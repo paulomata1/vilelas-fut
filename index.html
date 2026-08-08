@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0f172a">
+  <title>Vilelas Fut</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="wrap">
+  <header class="top">
+    <div><small>QUINTA DO FUT</small><h1>Vilelas Fut</h1></div>
+    <button id="resetBtn" class="secondary danger">Reiniciar</button>
+  </header>
+
+  <section class="card">
+    <div class="head">
+      <div>
+        <h2 id="cadTitle">Ordem de chegada</h2>
+        <p id="cadSub">Cadastre na ordem em que os atletas chegarem.</p>
+      </div>
+      <span id="count" class="badge">0 atletas</span>
+    </div>
+
+    <form id="form" class="add">
+      <input id="name" placeholder="Nome do atleta" autocomplete="off">
+      <button class="primary">Adicionar</button>
+    </form>
+
+    <div id="players"></div>
+    <button id="startBtn" class="primary full" disabled>Sortear primeira partida</button>
+  </section>
+
+  <section id="game" class="card hidden">
+    <div class="head">
+      <div><small>EM QUADRA</small><h2>Partida atual</h2></div>
+      <span id="match" class="badge">Jogo 1</span>
+    </div>
+
+    <div class="teams">
+      <div class="team">
+        <div class="teamhead"><h3>Time A</h3><span id="streakA" class="streak">0 vitórias</span></div>
+        <ol id="teamA"></ol>
+      </div>
+      <div class="x">X</div>
+      <div class="team">
+        <div class="teamhead"><h3>Time B</h3><span id="streakB" class="streak">0 vitórias</span></div>
+        <ol id="teamB"></ol>
+      </div>
+    </div>
+
+    <div class="results">
+      <button id="aWin" class="primary">Vitória A</button>
+      <button id="draw" class="draw">Empate</button>
+      <button id="bWin" class="primary">Vitória B</button>
+    </div>
+    <button id="undo" class="secondary full" disabled>Desfazer último resultado</button>
+  </section>
+
+  <section id="queueSec" class="card hidden">
+    <div class="head">
+      <div><small>ROTAÇÃO</small><h2>Fila de espera</h2></div>
+      <span id="queueCount" class="badge">0 esperando</span>
+    </div>
+    <div id="queue"></div>
+  </section>
+
+  <section id="historySec" class="card hidden">
+    <div class="head"><div><small>HISTÓRICO</small><h2>Partidas</h2></div></div>
+    <div id="history"></div>
+  </section>
+</main>
+<div id="toast" class="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>
