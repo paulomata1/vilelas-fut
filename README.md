@@ -16,3 +16,23 @@ Mantém todas as regras e recursos validados na V4 e adiciona:
 Suba todos os arquivos, incluindo `manifest.json`, `service-worker.js` e a pasta `icons/`, para a raiz do GitHub Pages.
 
 > Observação: o PWA depende de HTTPS, requisito que o GitHub Pages já atende.
+
+## V5.2 — ajuste do modo placar
+- Modo placar passa a ocupar a altura útil inteira do aparelho sem rolagem.
+- Em celulares na vertical, Time A e Time B permanecem lado a lado para caber na mesma tela.
+- Cronômetro, nomes, sequência, próximo time e controles se adaptam à largura e altura disponíveis.
+- Suporte a `100dvh` e áreas seguras de iPhone/PWA.
+- Cache do service worker atualizado para `vilelas-fut-v5-2`.
+
+
+## V5.3 · Ranking de goleiros e card ampliado
+- Cadastro separado de goleiros fixos da noite.
+- Registro de defesas difíceis com botão de correção.
+- Ranking dos goleiros por quantidade de defesas difíceis.
+- Card da noite em formato 1080x1920 com Top 5, 5 piores jogadores e ranking dos goleiros.
+- Mantidos os ajustes responsivos do modo placar da V5.2.
+
+## V5.4 · Sequências de 4 vitórias no Card da Noite
+- O Card da Noite agora mostra os times que alcançaram 4 vitórias consecutivas.
+- Cada registro mostra o número do jogo e os cinco atletas que formavam o time.
+- Quando houver várias sequências na noite, o card exibe as três mais recentes.

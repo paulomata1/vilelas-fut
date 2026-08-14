@@ -28,3 +28,128 @@ select{background:#0b1424;border:1px solid #334155;border-radius:10px;padding:9p
 @media(max-width:700px){.scoreTeams{grid-template-columns:1fr}.scoreX{height:38px}.scoreTeam{padding:18px}.scoreControls{grid-template-columns:1fr 1fr}.scoreTop{align-items:flex-start}.scoreTopActions{flex-direction:column}.scoreTimer{margin:18px 0}.topActions{flex-wrap:wrap;justify-content:flex-end}}
 
 .appCredit{text-align:center;color:#64748b;font-size:12px;margin:22px 0 2px}.appCredit strong{color:#94a3b8}
+
+/* V5.2 - placar responsivo sem rolagem */
+.scoreboard{
+  height:100vh;
+  height:100dvh;
+  min-height:100vh;
+  min-height:100dvh;
+  padding:
+    max(10px,env(safe-area-inset-top))
+    max(10px,env(safe-area-inset-right))
+    max(10px,env(safe-area-inset-bottom))
+    max(10px,env(safe-area-inset-left));
+  overflow:hidden;
+  display:grid;
+  grid-template-rows:auto auto minmax(0,1fr) auto auto;
+  gap:clamp(6px,1.2vh,14px);
+}
+.scoreboard.hidden{display:none!important}
+.scoreboard .scoreTop{min-height:0}
+.scoreboard .scoreTimer{
+  margin:0;
+  font-size:clamp(52px,10vh,118px);
+  line-height:.92;
+}
+.scoreboard .scoreTeams{
+  min-height:0;
+  height:100%;
+  grid-template-columns:minmax(0,1fr) clamp(24px,5vw,58px) minmax(0,1fr);
+  gap:clamp(6px,1.4vw,16px);
+}
+.scoreboard .scoreTeam{
+  min-width:0;
+  min-height:0;
+  height:100%;
+  padding:clamp(10px,1.8vh,22px);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+.scoreboard .scoreTeamHead{flex:0 0 auto;gap:6px}
+.scoreboard .scoreTeam h2{font-size:clamp(18px,2.6vh,38px);white-space:nowrap}
+.scoreboard .scoreTeam ol{
+  flex:1 1 auto;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-evenly;
+  min-height:0;
+  margin:clamp(6px,.8vh,12px) 0 0;
+  padding-left:clamp(22px,3vw,34px);
+}
+.scoreboard .scoreTeam li{
+  font-size:clamp(16px,2.35vh,34px);
+  line-height:1.05;
+  margin:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.scoreboard .scoreX{font-size:clamp(30px,5vh,62px);min-width:0}
+.scoreboard .scoreNext{
+  margin:0;
+  padding:clamp(7px,1vh,13px) clamp(10px,1.7vw,18px);
+  min-height:0;
+}
+.scoreboard .scoreNext small{font-size:clamp(8px,1.1vh,11px)}
+.scoreboard .scoreNext div{
+  font-size:clamp(13px,1.8vh,24px);
+  line-height:1.15;
+  margin-top:3px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.scoreboard .scoreControls{gap:clamp(5px,1vw,10px)}
+.scoreboard .scoreControls button{
+  min-width:0;
+  font-size:clamp(11px,1.55vh,16px);
+  padding:clamp(8px,1.1vh,12px) 6px;
+}
+.scoreboard .streak{
+  flex:0 0 auto;
+  font-size:clamp(9px,1.25vh,13px);
+  padding:clamp(4px,.65vh,7px) clamp(6px,.8vw,10px);
+}
+
+/* Celular em pé: mantém os dois times lado a lado para caber tudo em uma tela. */
+@media (max-width:700px) and (orientation:portrait){
+  .scoreboard{gap:clamp(5px,.9vh,9px)}
+  .scoreboard .scoreTop{align-items:flex-start}
+  .scoreboard .scoreTop>div:first-child{min-width:0}
+  .scoreboard .scoreTop small{font-size:clamp(8px,2.4vw,11px);letter-spacing:.12em;white-space:nowrap}
+  .scoreboard .scoreTop h2{font-size:clamp(21px,5.8vw,28px);margin-top:2px}
+  .scoreboard .scoreTopActions{flex-direction:row;gap:5px}
+  .scoreboard .scoreTopActions button{font-size:clamp(10px,2.7vw,13px);padding:8px 9px;white-space:nowrap}
+  .scoreboard .scoreTimer{font-size:clamp(54px,10vh,90px)}
+  .scoreboard .scoreTeams{grid-template-columns:minmax(0,1fr) 22px minmax(0,1fr);gap:5px}
+  .scoreboard .scoreTeam{padding:clamp(9px,1.4vh,13px);border-radius:15px}
+  .scoreboard .scoreTeamHead{align-items:flex-start;flex-direction:column;gap:4px}
+  .scoreboard .scoreTeam h2{font-size:clamp(18px,4.8vw,23px)}
+  .scoreboard .scoreTeam ol{padding-left:24px;margin-top:5px}
+  .scoreboard .scoreTeam li{font-size:clamp(16px,2.25vh,21px)}
+  .scoreboard .scoreX{height:auto;font-size:30px}
+  .scoreboard .scoreNext{border-radius:12px;padding:7px 10px}
+  .scoreboard .scoreNext div{font-size:clamp(12px,3.1vw,15px)}
+  .scoreboard .scoreControls{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+  .scoreboard .scoreControls button{font-size:clamp(9px,2.5vw,12px);padding:9px 3px;white-space:nowrap}
+  .scoreboard .streak{font-size:clamp(9px,2.5vw,11px);padding:4px 6px}
+}
+
+/* Telas muito baixas: reduz ainda mais os espaços verticais. */
+@media (max-height:700px){
+  .scoreboard{gap:4px}
+  .scoreboard .scoreTimer{font-size:clamp(44px,9vh,70px)}
+  .scoreboard .scoreTeam{padding:8px 10px}
+  .scoreboard .scoreTeam h2{font-size:17px}
+  .scoreboard .scoreTeam li{font-size:clamp(14px,2.4vh,18px)}
+  .scoreboard .scoreNext{padding:5px 8px}
+  .scoreboard .scoreControls button{padding:6px 3px}
+}
+
+/* V5.3 · ranking de goleiros */
+.keeperCard .head{align-items:flex-start}.keeperAdd{margin-bottom:10px}.keeperList{display:grid;gap:8px}.keeperEmpty{padding:6px 0}
+.keeperRow{display:grid;grid-template-columns:46px minmax(120px,1fr) auto auto;align-items:center;gap:10px;background:#0b1424;border:1px solid #26344b;border-radius:13px;padding:10px 11px}.keeperRow.keeperLeader{border-color:#0369a1;background:#0b1e2b}.keeperPos{font-weight:900;color:#7dd3fc;text-align:center}.keeperName{font-weight:800}.keeperSaves{color:#cbd5e1;font-size:12px;white-space:nowrap}.keeperSaves strong{font-size:20px;color:#f8fafc;margin-right:3px}.keeperActions{display:flex;gap:6px}.keeperSaveBtn,.keeperFixBtn,.keeperRemoveBtn{padding:8px 9px;font-size:11px;white-space:nowrap}.keeperRankingBox{margin-top:18px;background:#0b1424;border:1px solid #26344b;border-radius:13px;padding:12px}.keeperStatsHead{margin-top:0}.keeperRanking{display:grid;gap:7px;margin-top:10px}.keeperRankRow{display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:10px;padding:10px;border:1px solid #26344b;border-radius:10px;background:#101a2b}.keeperRankRow.keeperLeader{border-color:#0369a1;background:#0b1e2b}.keeperMedal{font-weight:900}.keeperRankRow span:last-child{color:#7dd3fc;font-weight:800;font-size:12px}
+@media(max-width:720px){.keeperRow{grid-template-columns:38px 1fr auto}.keeperSaves{grid-column:2/4}.keeperActions{grid-column:1/4;display:grid;grid-template-columns:1.4fr 1fr .9fr}.keeperActions button{width:100%}}
+@media(max-width:420px){.keeperRankRow{grid-template-columns:36px 1fr}.keeperRankRow span:last-child{grid-column:2}.keeperActions{grid-template-columns:1fr 1fr}.keeperRemoveBtn{grid-column:1/3}}

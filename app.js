@@ -1,16 +1,17 @@
 
 const E=id=>document.getElementById(id);
-const el={form:E('form'),name:E('name'),players:E('players'),count:E('count'),start:E('startBtn'),reset:E('resetBtn'),game:E('game'),queueSec:E('queueSec'),historySec:E('historySec'),summarySec:E('summarySec'),summaryGrid:E('summaryGrid'),statsBody:E('statsBody'),fourWinList:E('fourWinList'),teamA:E('teamA'),teamB:E('teamB'),streakA:E('streakA'),streakB:E('streakB'),match:E('match'),aWin:E('aWin'),bWin:E('bWin'),draw:E('draw'),undo:E('undo'),queue:E('queue'),queueCount:E('queueCount'),history:E('history'),toast:E('toast'),cadTitle:E('cadTitle'),cadSub:E('cadSub'),timer:E('timer'),timerToggle:E('timerToggle'),timerReset:E('timerReset'),rulesBtn:E('rulesBtn'),rulesModal:E('rulesModal'),rulesClose:E('rulesClose'),timerLimit:E('timerLimit'),nextTeamBox:E('nextTeamBox'),installBtn:E('installBtn'),installModal:E('installModal'),installClose:E('installClose'),installHelp:E('installHelp'),scoreboardBtn:E('scoreboardBtn'),scoreboard:E('scoreboard'),scoreClose:E('scoreClose'),scoreFullscreen:E('scoreFullscreen'),scoreMatch:E('scoreMatch'),scoreTimer:E('scoreTimer'),scoreTeamA:E('scoreTeamA'),scoreTeamB:E('scoreTeamB'),scoreStreakA:E('scoreStreakA'),scoreStreakB:E('scoreStreakB'),scoreNextTeam:E('scoreNextTeam'),scoreTimerToggle:E('scoreTimerToggle'),scoreAWin:E('scoreAWin'),scoreBWin:E('scoreBWin'),scoreDraw:E('scoreDraw'),shareCardBtn:E('shareCardBtn')};
+const el={form:E('form'),name:E('name'),players:E('players'),count:E('count'),start:E('startBtn'),reset:E('resetBtn'),game:E('game'),queueSec:E('queueSec'),historySec:E('historySec'),summarySec:E('summarySec'),summaryGrid:E('summaryGrid'),statsBody:E('statsBody'),fourWinList:E('fourWinList'),teamA:E('teamA'),teamB:E('teamB'),streakA:E('streakA'),streakB:E('streakB'),match:E('match'),aWin:E('aWin'),bWin:E('bWin'),draw:E('draw'),undo:E('undo'),queue:E('queue'),queueCount:E('queueCount'),history:E('history'),toast:E('toast'),cadTitle:E('cadTitle'),cadSub:E('cadSub'),timer:E('timer'),timerToggle:E('timerToggle'),timerReset:E('timerReset'),rulesBtn:E('rulesBtn'),rulesModal:E('rulesModal'),rulesClose:E('rulesClose'),timerLimit:E('timerLimit'),nextTeamBox:E('nextTeamBox'),installBtn:E('installBtn'),installModal:E('installModal'),installClose:E('installClose'),installHelp:E('installHelp'),scoreboardBtn:E('scoreboardBtn'),scoreboard:E('scoreboard'),scoreClose:E('scoreClose'),scoreFullscreen:E('scoreFullscreen'),scoreMatch:E('scoreMatch'),scoreTimer:E('scoreTimer'),scoreTeamA:E('scoreTeamA'),scoreTeamB:E('scoreTeamB'),scoreStreakA:E('scoreStreakA'),scoreStreakB:E('scoreStreakB'),scoreNextTeam:E('scoreNextTeam'),scoreTimerToggle:E('scoreTimerToggle'),scoreAWin:E('scoreAWin'),scoreBWin:E('scoreBWin'),scoreDraw:E('scoreDraw'),shareCardBtn:E('shareCardBtn'),keeperForm:E('keeperForm'),keeperName:E('keeperName'),keeperList:E('keeperList'),keeperCount:E('keeperCount'),keeperRanking:E('keeperRanking')};
 
-const blank=()=>({appVersion:5,players:[],started:false,courtA:[],courtB:[],queue:[],streakA:0,streakB:0,match:1,history:[],snapshots:[],timerElapsed:0,timerRunning:false,timerStartedAt:null,timerLimitMinutes:8,timerAlerted:false,injuryEvents:[],fourWinEvents:[],matchParticipantsA:[],matchParticipantsB:[]});
+const blank=()=>({appVersion:5.4,goalkeepers:[],players:[],started:false,courtA:[],courtB:[],queue:[],streakA:0,streakB:0,match:1,history:[],snapshots:[],timerElapsed:0,timerRunning:false,timerStartedAt:null,timerLimitMinutes:8,timerAlerted:false,injuryEvents:[],fourWinEvents:[],matchParticipantsA:[],matchParticipantsB:[]});
 const loaded=load();
 let s={...blank(),...(loaded||{})};
 if(!loaded){s.timerLimitMinutes=8}
-if(Number(s.appVersion||0)<5)s.appVersion=5
+if(Number(s.appVersion||0)<5.3)s.appVersion=5.3
 s.injuryEvents=Array.isArray(s.injuryEvents)?s.injuryEvents:[];
 s.fourWinEvents=Array.isArray(s.fourWinEvents)?s.fourWinEvents:[];
 s.matchParticipantsA=Array.isArray(s.matchParticipantsA)?s.matchParticipantsA:[];
 s.matchParticipantsB=Array.isArray(s.matchParticipantsB)?s.matchParticipantsB:[];
+s.goalkeepers=Array.isArray(s.goalkeepers)?s.goalkeepers:[];
 let timerInterval=null;
 let deferredInstallPrompt=null;
 
@@ -27,6 +28,26 @@ function snap(){
     streakA:s.streakA,streakB:s.streakB,match:s.match,history:s.history,timerElapsed:currentElapsed(),timerRunning:s.timerRunning,timerStartedAt:s.timerRunning?Date.now():null,timerLimitMinutes:s.timerLimitMinutes,timerAlerted:s.timerAlerted,injuryEvents:s.injuryEvents,fourWinEvents:s.fourWinEvents,matchParticipantsA:s.matchParticipantsA,matchParticipantsB:s.matchParticipantsB
   })));
   if(s.snapshots.length>20)s.snapshots.shift();
+}
+
+function addGoalkeeper(name){
+  name=name.trim();if(!name)return;
+  s.goalkeepers.push({id:id(),name,difficultSaves:0});
+  save();render();toast(`${name} adicionado aos goleiros.`);
+}
+function changeKeeperSave(kid,delta){
+  const k=s.goalkeepers.find(x=>x.id===kid);if(!k)return;
+  k.difficultSaves=Math.max(0,Number(k.difficultSaves||0)+delta);
+  save();render();
+  toast(delta>0?`Defesa difícil de ${k.name} registrada.`:`Contagem de ${k.name} corrigida.`);
+}
+function removeGoalkeeper(kid){
+  const k=s.goalkeepers.find(x=>x.id===kid);if(!k)return;
+  if(!confirm(`Remover ${k.name} do ranking de goleiros?`))return;
+  s.goalkeepers=s.goalkeepers.filter(x=>x.id!==kid);save();render();toast(`${k.name} removido dos goleiros.`);
+}
+function keeperStats(){
+  return [...s.goalkeepers].map(k=>({...k,difficultSaves:Number(k.difficultSaves||0)})).sort((a,b)=>b.difficultSaves-a.difficultSaves||a.name.localeCompare(b.name,'pt-BR'));
 }
 
 function addPlayer(name){
@@ -311,6 +332,27 @@ function reset(){
   clearInterval(timerInterval);timerInterval=null;s=blank();localStorage.removeItem('vilelasFutV2');render();
 }
 
+function renderGoalkeepers(){
+  if(!el.keeperList)return;
+  const ranked=keeperStats();
+  el.keeperCount.textContent=`${ranked.length} goleiro${ranked.length===1?'':'s'}`;
+  if(!ranked.length){
+    el.keeperList.innerHTML='<p class="muted keeperEmpty">Cadastre os goleiros fixos da noite para registrar as defesas difíceis.</p>';
+  }else{
+    el.keeperList.innerHTML=ranked.map((k,i)=>`<div class="keeperRow ${i===0&&k.difficultSaves>0?'keeperLeader':''}">
+      <span class="keeperPos">${i+1}º</span><span class="keeperName">🥅 ${esc(k.name)}</span>
+      <span class="keeperSaves"><strong>${k.difficultSaves}</strong> defesa${k.difficultSaves===1?'':'s'} difícil${k.difficultSaves===1?'':'eis'}</span>
+      <div class="keeperActions"><button class="primary keeperSaveBtn" data-ksave="${k.id}">+ Defesa difícil</button><button class="secondary keeperFixBtn" data-kfix="${k.id}" ${k.difficultSaves<=0?'disabled':''}>− Corrigir</button><button class="remove keeperRemoveBtn" data-krm="${k.id}">Remover</button></div>
+    </div>`).join('');
+    el.keeperList.querySelectorAll('[data-ksave]').forEach(b=>b.onclick=()=>changeKeeperSave(b.dataset.ksave,1));
+    el.keeperList.querySelectorAll('[data-kfix]').forEach(b=>b.onclick=()=>changeKeeperSave(b.dataset.kfix,-1));
+    el.keeperList.querySelectorAll('[data-krm]').forEach(b=>b.onclick=()=>removeGoalkeeper(b.dataset.krm));
+  }
+  if(el.keeperRanking){
+    el.keeperRanking.innerHTML=ranked.length?ranked.map((k,i)=>`<div class="keeperRankRow ${i===0&&k.difficultSaves>0?'keeperLeader':''}"><span class="keeperMedal">${i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}º`}</span><strong>${esc(k.name)}</strong><span>${k.difficultSaves} defesa${k.difficultSaves===1?'':'s'} difícil${k.difficultSaves===1?'':'eis'}</span></div>`).join(''):'<p class="muted">Nenhum goleiro cadastrado.</p>';
+  }
+}
+
 function renderPlayers(){
   el.count.textContent=`${s.players.length} atleta${s.players.length===1?'':'s'}`;
   el.start.disabled=s.started||s.players.length<10;
@@ -464,22 +506,58 @@ function roundRect(ctx,x,y,w,h,r,fill,stroke){
 function fitText(ctx,text,maxWidth,startSize,minSize=22){let size=startSize;while(size>minSize){ctx.font=`700 ${size}px Arial`;if(ctx.measureText(text).width<=maxWidth)break;size-=2}return size}
 function drawCard(){
   if(!s.history.length){toast('Finalize pelo menos uma partida para gerar o card.');return null}
-  const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1350;const ctx=canvas.getContext('2d');
-  ctx.fillStyle='#08111f';ctx.fillRect(0,0,1080,1350);
+  const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=2220;const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#08111f';ctx.fillRect(0,0,1080,2220);
   const grad=ctx.createLinearGradient(0,0,1080,0);grad.addColorStop(0,'#22c55e');grad.addColorStop(1,'#16a34a');ctx.fillStyle=grad;ctx.fillRect(0,0,1080,18);
   ctx.fillStyle='#22c55e';ctx.font='800 26px Arial';ctx.fillText('QUINTA DO FUT',64,82);
   ctx.fillStyle='#f8fafc';ctx.font='900 64px Arial';ctx.fillText('Vilelas Fut',64,148);
   ctx.fillStyle='#94a3b8';ctx.font='28px Arial';ctx.fillText(`Resumo da noite · ${new Date().toLocaleDateString('pt-BR')}`,64,195);
   const stats=computeStats();const totalDuration=s.history.reduce((sum,h)=>sum+Number(h.duration||0),0);const maxStreak=Math.max(0,...s.history.map(h=>Number(h.streak||0)));
-  const kpis=[['PARTIDAS',s.history.length],['ATLETAS',stats.length],['TEMPO',fmtTime(totalDuration)],['MAIOR SEQUÊNCIA',`${maxStreak} vit.`],['LESÕES',s.injuryEvents.length],['4 VITÓRIAS',s.fourWinEvents.length]];
-  kpis.forEach((k,i)=>{const col=i%3,row=Math.floor(i/3),x=64+col*318,y=245+row*142;roundRect(ctx,x,y,286,116,18,'#111827','#253147');ctx.fillStyle='#94a3b8';ctx.font='800 19px Arial';ctx.fillText(k[0],x+20,y+34);ctx.fillStyle='#f8fafc';ctx.font='900 38px Arial';ctx.fillText(String(k[1]),x+20,y+83)});
-  ctx.fillStyle='#22c55e';ctx.font='800 24px Arial';ctx.fillText('RANKING DA NOITE',64,560);
-  ctx.fillStyle='#f8fafc';ctx.font='900 38px Arial';ctx.fillText('Destaques individuais',64,608);
-  const active=stats.filter(x=>x.jogos>0||x.lesoes>0||x.tetras>0).slice(0,5);
-  active.forEach((x,i)=>{const y=646+i*106;roundRect(ctx,64,y,952,86,16,i===0?'#10271b':'#111827',i===0?'#166534':'#253147');ctx.fillStyle=i===0?'#86efac':'#cbd5e1';ctx.font='900 26px Arial';ctx.fillText(`${i+1}º`,86,y+51);ctx.fillStyle='#f8fafc';const fs=fitText(ctx,x.name,430,28,20);ctx.font=`800 ${fs}px Arial`;ctx.fillText(x.name,145,y+50);ctx.fillStyle='#94a3b8';ctx.font='700 21px Arial';ctx.fillText(`${x.jogos}J  ${x.vitorias}V  ${x.empates}E  ${x.derrotas}D`,600,y+36);ctx.fillStyle='#86efac';ctx.font='900 24px Arial';ctx.fillText(`${Math.round(x.aproveitamento)}%`,880,y+57)});
-  const footerY=1212;ctx.fillStyle='#94a3b8';ctx.font='22px Arial';ctx.fillText('Gerado pelo Vilelas Fut',64,footerY);ctx.fillStyle='#22c55e';ctx.font='800 22px Arial';ctx.textAlign='right';ctx.fillText('Desenvolvido por Paulo Victor',1016,footerY);ctx.textAlign='left';
+  const keepers=keeperStats();
+  const activeAll=stats.filter(x=>x.jogos>0||x.lesoes>0||x.tetras>0);
+  const top5=activeAll.slice(0,5);
+  const worst5=[...activeAll].reverse().slice(0,5);
+  const kpis=[['PARTIDAS',s.history.length],['ATLETAS',activeAll.length],['TEMPO',fmtTime(totalDuration)],['MAIOR SEQUÊNCIA',`${maxStreak} vit.`],['LESÕES',s.injuryEvents.length],['GOLEIROS',keepers.length]];
+  kpis.forEach((k,i)=>{const col=i%3,row=Math.floor(i/3),x=64+col*318,y=245+row*128;roundRect(ctx,x,y,286,104,18,'#111827','#253147');ctx.fillStyle='#94a3b8';ctx.font='800 18px Arial';ctx.fillText(k[0],x+20,y+31);ctx.fillStyle='#f8fafc';ctx.font='900 34px Arial';ctx.fillText(String(k[1]),x+20,y+76)});
+
+  function drawPlayerSection(title,subtitle,items,startY,best){
+    ctx.fillStyle=best?'#22c55e':'#f59e0b';ctx.font='800 22px Arial';ctx.fillText(title,64,startY);
+    ctx.fillStyle='#f8fafc';ctx.font='900 34px Arial';ctx.fillText(subtitle,64,startY+44);
+    items.forEach((x,i)=>{const y=startY+72+i*76;roundRect(ctx,64,y,952,62,14,best&&i===0?'#10271b':'#111827',best&&i===0?'#166534':'#253147');ctx.fillStyle=best&&i===0?'#86efac':'#cbd5e1';ctx.font='900 22px Arial';ctx.fillText(`${i+1}º`,84,y+39);ctx.fillStyle='#f8fafc';const fs=fitText(ctx,x.name,400,25,18);ctx.font=`800 ${fs}px Arial`;ctx.fillText(x.name,140,y+39);ctx.fillStyle='#94a3b8';ctx.font='700 18px Arial';ctx.fillText(`${x.jogos}J  ${x.vitorias}V  ${x.empates}E  ${x.derrotas}D`,575,y+27);ctx.fillStyle=best?'#86efac':'#fbbf24';ctx.font='900 21px Arial';ctx.fillText(`${Math.round(x.aproveitamento)}%`,888,y+42)});
+  }
+  drawPlayerSection('RANKING DA NOITE','Top 5 jogadores',top5,525,true);
+  drawPlayerSection('PARTE DE BAIXO DO RANKING','5 piores jogadores',worst5,1020,false);
+
+  const keeperY=1515;
+  ctx.fillStyle='#38bdf8';ctx.font='800 22px Arial';ctx.fillText('🥅 RANKING DOS GOLEIROS',64,keeperY);
+  ctx.fillStyle='#f8fafc';ctx.font='900 34px Arial';ctx.fillText('Defesas difíceis',64,keeperY+44);
+  if(keepers.length){
+    keepers.slice(0,3).forEach((k,i)=>{const y=keeperY+72+i*78;roundRect(ctx,64,y,952,64,14,i===0&&k.difficultSaves>0?'#0d2330':'#111827',i===0&&k.difficultSaves>0?'#0369a1':'#253147');ctx.fillStyle='#f8fafc';ctx.font='900 24px Arial';ctx.fillText(i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}º`,84,y+41);const fs=fitText(ctx,k.name,500,26,18);ctx.font=`800 ${fs}px Arial`;ctx.fillText(k.name,150,y+41);ctx.textAlign='right';ctx.fillStyle='#7dd3fc';ctx.font='900 23px Arial';ctx.fillText(`${k.difficultSaves} defesa${k.difficultSaves===1?'':'s'} difícil${k.difficultSaves===1?'':'eis'}`,990,y+41);ctx.textAlign='left'});
+  }else{
+    ctx.fillStyle='#94a3b8';ctx.font='22px Arial';ctx.fillText('Nenhum goleiro cadastrado nesta noite.',64,keeperY+92);
+  }
+  // Times que conseguiram 4 vitórias consecutivas
+  const fourY=1810;
+  ctx.fillStyle='#f97316';ctx.font='800 22px Arial';ctx.fillText('🔥 SEQUÊNCIAS DE 4 VITÓRIAS',64,fourY);
+  if(s.fourWinEvents.length){
+    s.fourWinEvents.slice(-3).reverse().forEach((e,i)=>{
+      const y=fourY+28+i*86;
+      roundRect(ctx,64,y,952,72,14,'#111827','#7c2d12');
+      ctx.fillStyle='#fdba74';ctx.font='900 20px Arial';ctx.fillText(`Jogo ${e.match}`,84,y+29);
+      ctx.fillStyle='#f8fafc';
+      const names=e.players.map(p=>p.name).join(' · ');
+      const fs=fitText(ctx,names,790,23,16);
+      ctx.font=`800 ${fs}px Arial`;
+      ctx.fillText(names,84,y+56);
+    });
+  }else{
+    ctx.fillStyle='#94a3b8';ctx.font='22px Arial';ctx.fillText('Nenhum time conseguiu 4 vitórias seguidas nesta noite.',64,fourY+48);
+  }
+
+  const footerY=2170;ctx.fillStyle='#94a3b8';ctx.font='22px Arial';ctx.fillText('Gerado pelo Vilelas Fut',64,footerY);ctx.fillStyle='#22c55e';ctx.font='800 22px Arial';ctx.textAlign='right';ctx.fillText('Desenvolvido por Paulo Victor',1016,footerY);ctx.textAlign='left';
   return canvas;
 }
+
 function downloadBlob(blob,name){const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 async function shareNightCard(){
   const canvas=drawCard();if(!canvas)return;
@@ -504,9 +582,10 @@ function renderHistory(){
   el.history.innerHTML=s.history.map(h=>`<div class="hist"><strong>Jogo ${h.match} · ${esc(h.text)}${h.duration!=null?` · ${fmtTime(h.duration)}`:''}</strong><br><span>A: ${h.a.map(esc).join(', ')}</span><br><span>B: ${h.b.map(esc).join(', ')}</span></div>`).join('');
 }
 
-function render(){renderPlayers();renderGame();renderSummary();renderScoreboard();if(s.started){renderQueue();renderHistory()}save()}
+function render(){renderGoalkeepers();renderPlayers();renderGame();renderSummary();renderScoreboard();if(s.started){renderQueue();renderHistory()}save()}
 
 el.form.onsubmit=e=>{e.preventDefault();addPlayer(el.name.value);el.name.value='';el.name.focus()};
+if(el.keeperForm)el.keeperForm.onsubmit=e=>{e.preventDefault();addGoalkeeper(el.keeperName.value);el.keeperName.value='';el.keeperName.focus()};
 el.start.onclick=start;el.aWin.onclick=()=>win('A');el.bWin.onclick=()=>win('B');el.draw.onclick=draw;el.undo.onclick=undo;el.reset.onclick=reset;el.timerToggle.onclick=toggleTimer;el.timerReset.onclick=manualResetTimer;el.timerLimit.onchange=setTimerLimit;el.rulesBtn.onclick=()=>el.rulesModal.classList.remove('hidden');el.rulesClose.onclick=()=>el.rulesModal.classList.add('hidden');el.rulesModal.onclick=e=>{if(e.target===el.rulesModal)el.rulesModal.classList.add('hidden')};
 el.installBtn.onclick=installApp;el.installClose.onclick=()=>el.installModal.classList.add('hidden');el.installModal.onclick=e=>{if(e.target===el.installModal)el.installModal.classList.add('hidden')};
 el.scoreboardBtn.onclick=openScoreboard;el.scoreClose.onclick=closeScoreboard;el.scoreFullscreen.onclick=toggleScoreFullscreen;el.scoreTimerToggle.onclick=toggleTimer;el.scoreAWin.onclick=()=>win('A');el.scoreBWin.onclick=()=>win('B');el.scoreDraw.onclick=draw;el.shareCardBtn.onclick=shareNightCard;
