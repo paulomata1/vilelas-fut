@@ -4,6 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Vilelas Fut">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
   <title>Vilelas Fut</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -11,7 +16,7 @@
 <main class="wrap">
   <header class="top">
     <div><small>QUINTA DO FUT</small><h1>Vilelas Fut</h1></div>
-    <button id="resetBtn" class="secondary danger">Reiniciar</button>
+    <div class="topActions"><button id="installBtn" class="secondary">📱 Instalar</button><button id="scoreboardBtn" class="secondary hidden">🖥️ Placar</button><button id="rulesBtn" class="secondary">Regras</button><button id="resetBtn" class="secondary danger">Reiniciar</button></div>
   </header>
 
   <section class="card">
@@ -50,6 +55,26 @@
       </div>
     </div>
 
+    <div class="timerbox">
+      <small>CRONÔMETRO</small>
+      <div id="timer" class="timer">00:00</div>
+      <div class="timerConfig">
+        <label for="timerLimit">Alerta de tempo</label>
+        <select id="timerLimit">
+          <option value="0">Sem limite</option>
+          <option value="5">5 min</option>
+          <option value="7">7 min</option>
+          <option value="8" selected>8 min</option>
+          <option value="10">10 min</option>
+          <option value="12">12 min</option>
+        </select>
+      </div>
+      <div class="timerActions">
+        <button id="timerToggle" class="secondary">Iniciar</button>
+        <button id="timerReset" class="secondary">Zerar</button>
+      </div>
+    </div>
+
     <div class="results">
       <button id="aWin" class="primary">Vitória A</button>
       <button id="draw" class="draw">Empate</button>
@@ -63,14 +88,87 @@
       <div><small>ROTAÇÃO</small><h2>Fila de espera</h2></div>
       <span id="queueCount" class="badge">0 esperando</span>
     </div>
+    <div id="nextTeamBox" class="nextTeamBox"></div>
     <div id="queue"></div>
+  </section>
+
+  <section id="summarySec" class="card hidden">
+    <div class="head">
+      <div><small>V5 · ESTATÍSTICAS</small><h2>Resumo da noite</h2></div>
+      <button id="shareCardBtn" class="primary">📤 Card da noite</button>
+    </div>
+    <div id="summaryGrid" class="summaryGrid"></div>
+
+    <div class="statsHead">
+      <div><small>RANKING</small><h3>Estatísticas individuais</h3></div>
+      <span class="statsHint">Aproveitamento = pontos conquistados ÷ pontos possíveis</span>
+    </div>
+    <div class="tableWrap">
+      <table class="statsTable">
+        <thead><tr><th>Atleta</th><th>J</th><th>V</th><th>E</th><th>D</th><th>Aprov.</th><th>🔥4</th><th>🩹</th></tr></thead>
+        <tbody id="statsBody"></tbody>
+      </table>
+    </div>
+
+    <div class="achievementsBox">
+      <small>SEQUÊNCIAS DE 4 VITÓRIAS</small>
+      <div id="fourWinList"></div>
+    </div>
   </section>
 
   <section id="historySec" class="card hidden">
     <div class="head"><div><small>HISTÓRICO</small><h2>Partidas</h2></div></div>
     <div id="history"></div>
   </section>
+  <footer class="appCredit">Desenvolvido por <strong>Paulo Victor</strong></footer>
 </main>
+<div id="rulesModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+  <div class="modalCard">
+    <div class="head"><h2 id="rulesTitle">Regras · Vilelas Fut</h2><button id="rulesClose" class="secondary">Fechar</button></div>
+    <div class="rulesText">
+      <h3>Formação inicial</h3><p>Os 10 primeiros atletas são sorteados aleatoriamente em dois times de 5. Os demais ficam na fila por ordem de chegada.</p>
+      <h3>Fila</h3><p>A fila é individual. Novos atletas entram no final e os próximos times são sempre formados pelos primeiros 5 disponíveis.</p>
+      <h3>Vitória normal</h3><p>Na 1ª, 2ª ou 3ª vitória consecutiva, o vencedor permanece. O perdedor vai ao final da fila e entra o próximo time completo.</p>
+      <h3>4 vitórias consecutivas</h3><p>O vencedor da 4ª sai obrigatoriamente. Se houver dois times completos esperando, saem os dois times em quadra, entram os dois próximos e, depois de quem já aguardava, o vencedor das 4 entra na fila antes do perdedor. Se não houver dois times completos, somente o vencedor das 4 sai e o perdedor permanece.</p>
+      <h3>Empate</h3><p>Com dois times completos esperando, os dois times em quadra saem. Caso contrário, ímpar ou par define qual time permanece.</p>
+      <h3>Lesão</h3><p>Um atleta em quadra pode sair por lesão. O primeiro atleta da fila entra em seu lugar e o lesionado vai para o final da fila. A partida e a sequência de vitórias continuam normalmente. Se não houver substituto na fila, a troca não é realizada.</p>
+      <h3>Desistência</h3><p>Atleta em quadra não pode desistir diretamente. Quando estiver na fila, o botão Desistiu remove o atleta da noite.</p>
+      <h3>Cronômetro</h3><p>O cronômetro pode ser iniciado, pausado e continuado. Cada nova noite começa com alerta padrão de 8 minutos, podendo ser alterado para 5, 7, 10 ou 12 minutos, ou ficar sem limite. Ao atingir o tempo configurado, o app avisa, mas a partida continua. Ao registrar o resultado ele para, a duração é salva no histórico e o próximo jogo começa em 00:00.</p>
+      <h3>Edição de nome</h3><p>O nome de qualquer atleta pode ser corrigido sem alterar sua posição na fila ou no time.</p>
+      <h3>Estatísticas da noite</h3><p>As partidas alimentam automaticamente o resumo e o ranking individual. Vitória vale 3 pontos, empate vale 1 e derrota vale 0 para o cálculo de aproveitamento. Em caso de lesão, o atleta que participou antes da substituição e o substituto contam como participantes daquela partida.</p>
+      <h3>Modo placar</h3><p>O modo placar mostra em tela dedicada os times em quadra, sequência de vitórias, cronômetro, próximo time e controles principais da partida. Pode ser colocado em tela cheia.</p>
+      <h3>Card da noite</h3><p>O app gera uma imagem com o resumo da noite e os destaques do ranking. Em celulares compatíveis, o compartilhamento nativo permite enviar diretamente para aplicativos como WhatsApp; nos demais casos, o PNG é baixado.</p>
+    </div>
+  </div>
+</div>
+
+<div id="installModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="installTitle">
+  <div class="modalCard compactModal">
+    <div class="head"><h2 id="installTitle">Instalar Vilelas Fut</h2><button id="installClose" class="secondary">Fechar</button></div>
+    <div id="installHelp" class="installHelp"></div>
+  </div>
+</div>
+
+<div id="scoreboard" class="scoreboard hidden" role="dialog" aria-modal="true" aria-label="Modo placar">
+  <div class="scoreTop">
+    <div><small>VILELAS FUT · MODO PLACAR</small><h2 id="scoreMatch">Jogo 1</h2></div>
+    <div class="scoreTopActions"><button id="scoreFullscreen" class="secondary">Tela cheia</button><button id="scoreClose" class="secondary">Sair</button></div>
+  </div>
+  <div class="scoreTimer" id="scoreTimer">00:00</div>
+  <div class="scoreTeams">
+    <div class="scoreTeam"><div class="scoreTeamHead"><h2>TIME A</h2><span id="scoreStreakA" class="streak">0 vitórias</span></div><ol id="scoreTeamA"></ol></div>
+    <div class="scoreX">×</div>
+    <div class="scoreTeam"><div class="scoreTeamHead"><h2>TIME B</h2><span id="scoreStreakB" class="streak">0 vitórias</span></div><ol id="scoreTeamB"></ol></div>
+  </div>
+  <div class="scoreNext"><small>PRÓXIMO TIME</small><div id="scoreNextTeam">Aguardando...</div></div>
+  <div class="scoreControls">
+    <button id="scoreTimerToggle" class="secondary">Iniciar</button>
+    <button id="scoreAWin" class="primary">Vitória A</button>
+    <button id="scoreDraw" class="draw">Empate</button>
+    <button id="scoreBWin" class="primary">Vitória B</button>
+  </div>
+</div>
+
 <div id="toast" class="toast"></div>
 <script src="app.js"></script>
 </body>

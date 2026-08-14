@@ -1,18 +1,18 @@
-# Vilelas Fut V2
+# Vilelas Fut V5
 
-Atualizações principais:
-- É possível adicionar atletas antes e depois do início das partidas.
-- Atleta que chega depois do início entra automaticamente no final da fila.
-- Atleta em quadra NÃO pode ser removido.
-- O botão "Desistiu" aparece somente para atletas que estão na fila de espera.
-- Ao remover alguém da fila, os demais sobem automaticamente e os próximos times são recalculados.
-- Os 10 primeiros continuam sendo sorteados em 2 times de 5.
-- A fila continua individual, permitindo mistura natural quando sobram 1, 2, 3 ou 4 atletas.
-- Estado salvo no navegador.
-- Histórico e desfazer último resultado.
+Mantém todas as regras e recursos validados na V4 e adiciona:
 
+- PWA instalável no celular/desktop, com manifest, ícones e service worker.
+- Funcionamento offline dos arquivos principais após o primeiro carregamento.
+- Botão "Instalar" com suporte ao prompt do navegador e instruções quando necessário.
+- Modo Placar dedicado com times, sequência de vitórias, cronômetro, próximo time e controles de resultado.
+- Opção de tela cheia no modo placar.
+- Card da noite gerado em PNG (1080x1350) com resumo e Top 5 do ranking.
+- Compartilhamento nativo do card em celulares compatíveis (incluindo WhatsApp quando disponível no menu de compartilhamento).
+- Fallback para download do PNG quando o compartilhamento de arquivos não é suportado.
+- Tempo padrão de nova noite continua em 8 minutos.
 
-## Regra atualizada — 4 vitórias consecutivas
-- O time que conquista a 4ª vitória consecutiva obrigatoriamente sai da quadra.
-- Se já houver dois times completos (10 atletas) aguardando fora, o perdedor também sai e entram os dois times da fila.
-- Se não houver dois times completos aguardando, apenas o vencedor das 4 sai; o perdedor permanece em quadra e enfrenta o próximo time formado pela fila.
+## Publicação
+Suba todos os arquivos, incluindo `manifest.json`, `service-worker.js` e a pasta `icons/`, para a raiz do GitHub Pages.
+
+> Observação: o PWA depende de HTTPS, requisito que o GitHub Pages já atende.

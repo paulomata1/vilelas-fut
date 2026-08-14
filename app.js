@@ -1,9 +1,18 @@
 
 const E=id=>document.getElementById(id);
-const el={form:E('form'),name:E('name'),players:E('players'),count:E('count'),start:E('startBtn'),reset:E('resetBtn'),game:E('game'),queueSec:E('queueSec'),historySec:E('historySec'),teamA:E('teamA'),teamB:E('teamB'),streakA:E('streakA'),streakB:E('streakB'),match:E('match'),aWin:E('aWin'),bWin:E('bWin'),draw:E('draw'),undo:E('undo'),queue:E('queue'),queueCount:E('queueCount'),history:E('history'),toast:E('toast'),cadTitle:E('cadTitle'),cadSub:E('cadSub')};
+const el={form:E('form'),name:E('name'),players:E('players'),count:E('count'),start:E('startBtn'),reset:E('resetBtn'),game:E('game'),queueSec:E('queueSec'),historySec:E('historySec'),summarySec:E('summarySec'),summaryGrid:E('summaryGrid'),statsBody:E('statsBody'),fourWinList:E('fourWinList'),teamA:E('teamA'),teamB:E('teamB'),streakA:E('streakA'),streakB:E('streakB'),match:E('match'),aWin:E('aWin'),bWin:E('bWin'),draw:E('draw'),undo:E('undo'),queue:E('queue'),queueCount:E('queueCount'),history:E('history'),toast:E('toast'),cadTitle:E('cadTitle'),cadSub:E('cadSub'),timer:E('timer'),timerToggle:E('timerToggle'),timerReset:E('timerReset'),rulesBtn:E('rulesBtn'),rulesModal:E('rulesModal'),rulesClose:E('rulesClose'),timerLimit:E('timerLimit'),nextTeamBox:E('nextTeamBox'),installBtn:E('installBtn'),installModal:E('installModal'),installClose:E('installClose'),installHelp:E('installHelp'),scoreboardBtn:E('scoreboardBtn'),scoreboard:E('scoreboard'),scoreClose:E('scoreClose'),scoreFullscreen:E('scoreFullscreen'),scoreMatch:E('scoreMatch'),scoreTimer:E('scoreTimer'),scoreTeamA:E('scoreTeamA'),scoreTeamB:E('scoreTeamB'),scoreStreakA:E('scoreStreakA'),scoreStreakB:E('scoreStreakB'),scoreNextTeam:E('scoreNextTeam'),scoreTimerToggle:E('scoreTimerToggle'),scoreAWin:E('scoreAWin'),scoreBWin:E('scoreBWin'),scoreDraw:E('scoreDraw'),shareCardBtn:E('shareCardBtn')};
 
-const blank=()=>({players:[],started:false,courtA:[],courtB:[],queue:[],streakA:0,streakB:0,match:1,history:[],snapshots:[]});
-let s=load()||blank();
+const blank=()=>({appVersion:5,players:[],started:false,courtA:[],courtB:[],queue:[],streakA:0,streakB:0,match:1,history:[],snapshots:[],timerElapsed:0,timerRunning:false,timerStartedAt:null,timerLimitMinutes:8,timerAlerted:false,injuryEvents:[],fourWinEvents:[],matchParticipantsA:[],matchParticipantsB:[]});
+const loaded=load();
+let s={...blank(),...(loaded||{})};
+if(!loaded){s.timerLimitMinutes=8}
+if(Number(s.appVersion||0)<5)s.appVersion=5
+s.injuryEvents=Array.isArray(s.injuryEvents)?s.injuryEvents:[];
+s.fourWinEvents=Array.isArray(s.fourWinEvents)?s.fourWinEvents:[];
+s.matchParticipantsA=Array.isArray(s.matchParticipantsA)?s.matchParticipantsA:[];
+s.matchParticipantsB=Array.isArray(s.matchParticipantsB)?s.matchParticipantsB:[];
+let timerInterval=null;
+let deferredInstallPrompt=null;
 
 function load(){try{return JSON.parse(localStorage.getItem('vilelasFutV2'))}catch(e){return null}}
 function save(){localStorage.setItem('vilelasFutV2',JSON.stringify(s))}
@@ -15,7 +24,7 @@ function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){let j=Math.floor(Math
 function snap(){
   s.snapshots.push(JSON.parse(JSON.stringify({
     players:s.players,started:s.started,courtA:s.courtA,courtB:s.courtB,queue:s.queue,
-    streakA:s.streakA,streakB:s.streakB,match:s.match,history:s.history
+    streakA:s.streakA,streakB:s.streakB,match:s.match,history:s.history,timerElapsed:currentElapsed(),timerRunning:s.timerRunning,timerStartedAt:s.timerRunning?Date.now():null,timerLimitMinutes:s.timerLimitMinutes,timerAlerted:s.timerAlerted,injuryEvents:s.injuryEvents,fourWinEvents:s.fourWinEvents,matchParticipantsA:s.matchParticipantsA,matchParticipantsB:s.matchParticipantsB
   })));
   if(s.snapshots.length>20)s.snapshots.shift();
 }
@@ -27,6 +36,24 @@ function addPlayer(name){
   if(s.started)s.queue.push(p); // chega depois -> final da fila
   save();render();
   toast(s.started?`${name} entrou no final da fila.`:`${name} adicionado.`);
+}
+
+function editPlayer(pid){
+  const p=s.players.find(x=>x.id===pid);if(!p)return;
+  const newName=prompt('Editar nome do atleta:',p.name);
+  if(newName===null)return;
+  const name=newName.trim();if(!name){toast('O nome do atleta não pode ficar vazio.');return}
+  const old=p.name;
+  [s.players,s.courtA,s.courtB,s.queue].forEach(list=>list.forEach(x=>{if(x.id===pid)x.name=name}));
+  s.history.forEach(h=>{
+    (h.aParticipants||[]).forEach(x=>{if(x.id===pid)x.name=name});
+    (h.bParticipants||[]).forEach(x=>{if(x.id===pid)x.name=name});
+    if(Array.isArray(h.a))h.a=h.a.map(x=>x===old?name:x);
+    if(Array.isArray(h.b))h.b=h.b.map(x=>x===old?name:x);
+  });
+  s.injuryEvents.forEach(e=>{if(e.injured?.id===pid)e.injured.name=name;if(e.replacement?.id===pid)e.replacement.name=name});
+  s.fourWinEvents.forEach(e=>(e.players||[]).forEach(x=>{if(x.id===pid)x.name=name}));
+  save();render();toast(old===name?'Nome mantido.':`${old} agora é ${name}.`);
 }
 
 function removePlayer(pid){
@@ -50,13 +77,60 @@ function start(){
   if(s.players.length<10)return;
   const first=shuffle(s.players.slice(0,10));
   s.courtA=first.slice(0,5); s.courtB=first.slice(5);
-  s.queue=s.players.slice(10); s.started=true;s.streakA=0;s.streakB=0;s.match=1;s.history=[];s.snapshots=[];
+  s.queue=s.players.slice(10); s.started=true;s.streakA=0;s.streakB=0;s.match=1;s.history=[];s.snapshots=[];s.timerElapsed=0;s.timerRunning=false;s.timerStartedAt=null;s.timerAlerted=false;s.injuryEvents=[];s.fourWinEvents=[];s.matchParticipantsA=s.courtA.map(p=>p.id);s.matchParticipantsB=s.courtB.map(p=>p.id);
   save();render();toast('Primeira partida sorteada.');
 }
 
-function hist(text,a,b){
-  s.history.unshift({match:s.match,text,a:a.map(x=>x.name),b:b.map(x=>x.name)});
+function participantsFor(ids,fallback){
+  const all=[...s.players,...s.courtA,...s.courtB,...s.queue];
+  const byId=new Map(all.map(p=>[p.id,p]));
+  const out=(ids||[]).map(pid=>byId.get(pid)).filter(Boolean).map(p=>({id:p.id,name:p.name}));
+  if(out.length)return out;
+  return fallback.map(p=>({id:p.id,name:p.name}));
 }
+function hist(text,a,b,duration=currentElapsed(),meta={}){
+  const aParticipants=participantsFor(s.matchParticipantsA,a);
+  const bParticipants=participantsFor(s.matchParticipantsB,b);
+  s.history.unshift({match:s.match,text,a:a.map(x=>x.name),b:b.map(x=>x.name),aParticipants,bParticipants,duration,...meta});
+}
+function setParticipantsForCurrentMatch(){
+  s.matchParticipantsA=s.courtA.map(p=>p.id);
+  s.matchParticipantsB=s.courtB.map(p=>p.id);
+}
+function currentElapsed(){return (s.timerElapsed||0)+(s.timerRunning&&s.timerStartedAt?Date.now()-s.timerStartedAt:0)}
+function fmtTime(ms){const sec=Math.floor(ms/1000),m=Math.floor(sec/60),r=sec%60;return `${String(m).padStart(2,'0')}:${String(r).padStart(2,'0')}`}
+function playTimerAlert(){
+  try{
+    const Ctx=window.AudioContext||window.webkitAudioContext;
+    if(!Ctx)return;
+    const ctx=new Ctx();
+    const now=ctx.currentTime;
+    [0,.22,.44].forEach((delay,i)=>{
+      const osc=ctx.createOscillator(),gain=ctx.createGain();
+      osc.type='sine';osc.frequency.value=i===2?1040:880;
+      gain.gain.setValueAtTime(.0001,now+delay);
+      gain.gain.exponentialRampToValueAtTime(.22,now+delay+.02);
+      gain.gain.exponentialRampToValueAtTime(.0001,now+delay+.18);
+      osc.connect(gain);gain.connect(ctx.destination);osc.start(now+delay);osc.stop(now+delay+.2);
+    });
+    setTimeout(()=>ctx.close(),1000);
+  }catch(e){}
+  if(navigator.vibrate)navigator.vibrate([180,100,180,100,260]);
+}
+function checkTimerLimit(){
+  const limit=Number(s.timerLimitMinutes||0);
+  if(!limit||s.timerAlerted)return;
+  if(currentElapsed()>=limit*60000){
+    s.timerAlerted=true;save();playTimerAlert();toast(`Tempo de ${limit} min atingido. A partida continua.`);
+  }
+}
+function updateTimer(){const value=fmtTime(currentElapsed());if(el.timer)el.timer.textContent=value;if(el.scoreTimer)el.scoreTimer.textContent=value;checkTimerLimit()}
+function pauseTimer(){if(s.timerRunning){s.timerElapsed=currentElapsed();s.timerRunning=false;s.timerStartedAt=null;save()}clearInterval(timerInterval);timerInterval=null;updateTimer()}
+function resetTimerForNext(){pauseTimer();s.timerElapsed=0;s.timerAlerted=false;updateTimer()}
+function toggleTimer(){if(!s.started)return;if(s.timerRunning){pauseTimer();render()}else{s.timerRunning=true;s.timerStartedAt=Date.now();timerInterval=setInterval(updateTimer,500);save();render()}}
+function manualResetTimer(){if(s.timerRunning&&!confirm('Zerar o cronômetro enquanto ele está rodando?'))return;s.timerElapsed=0;s.timerStartedAt=s.timerRunning?Date.now():null;s.timerAlerted=false;save();updateTimer()}
+function setTimerLimit(){s.timerLimitMinutes=Number(el.timerLimit.value||0);s.timerAlerted=false;save();updateTimer();toast(s.timerLimitMinutes?`Alerta configurado para ${s.timerLimitMinutes} minutos.`:'Cronômetro sem limite de tempo.');}
+
 function take5(){return s.queue.length>=5?s.queue.splice(0,5):null}
 
 function win(side){
@@ -67,11 +141,14 @@ function win(side){
   const loser=side==='A'?B:A;
   const streak=(side==='A'?s.streakA:s.streakB)+1;
 
-  hist(`Vitória do Time ${side}`,A,B);
+  const duration=currentElapsed();
+  pauseTimer();
+  hist(`Vitória do Time ${side}`,A,B,duration,{result:'win',winner:side,streak});
 
   // REGRA DAS 4 VITÓRIAS:
   // Ao vencer a 4ª consecutiva, o vencedor obrigatoriamente sai.
   if(streak>=4){
+    s.fourWinEvents.push({match:s.match,side,players:winner.map(p=>({id:p.id,name:p.name}))});
 
     // Caso existam pelo menos dois times completos FORA antes da troca:
     // vencedor e perdedor saem, e entram dois novos times da fila.
@@ -80,9 +157,9 @@ function win(side){
       const next2=s.queue.splice(0,5);
 
       // Os dois times que estavam em quadra vão para o final da fila.
-      // Colocamos primeiro o perdedor e depois o vencedor das 4,
-      // preservando a rotação sem impedir a entrada dos dois times que já aguardavam.
-      s.queue.push(...loser,...winner);
+      // O vencedor das 4 tem preferência sobre o perdedor, sem ultrapassar
+      // os atletas que já estavam aguardando antes da troca.
+      s.queue.push(...winner,...loser);
 
       s.courtA=next1;
       s.courtB=next2;
@@ -130,6 +207,8 @@ function win(side){
     }
 
     s.match++;
+    setParticipantsForCurrentMatch();
+    resetTimerForNext();
     save();
     render();
     return;
@@ -172,6 +251,8 @@ function win(side){
   }
 
   s.match++;
+  setParticipantsForCurrentMatch();
+  resetTimerForNext();
   save();
   render();
 }
@@ -179,7 +260,9 @@ function win(side){
 function draw(){
   snap();
   const A=[...s.courtA],B=[...s.courtB];
-  hist('Empate',A,B);
+  const duration=currentElapsed();
+  pauseTimer();
+  hist('Empate',A,B,duration,{result:'draw',streak:0});
   if(s.queue.length>=10){
     s.queue.push(...A,...B);
     s.courtA=take5();s.courtB=take5();s.streakA=0;s.streakB=0;
@@ -198,18 +281,34 @@ function draw(){
       s.queue=s.queue.filter(x=>!ids.has(x.id));
     }
   }
-  s.match++;save();render();
+  s.match++;setParticipantsForCurrentMatch();resetTimerForNext();save();render();
+}
+
+function injury(pid){
+  if(!s.started)return;
+  if(!s.queue.length){toast('Não há atleta na fila disponível para substituir.');return}
+  const ai=s.courtA.findIndex(p=>p.id===pid), bi=s.courtB.findIndex(p=>p.id===pid);
+  if(ai<0&&bi<0)return;
+  const injured=ai>=0?s.courtA[ai]:s.courtB[bi];
+  const replacement=s.queue.shift();
+  if(ai>=0){s.courtA[ai]=replacement;if(!s.matchParticipantsA.includes(replacement.id))s.matchParticipantsA.push(replacement.id)}else{s.courtB[bi]=replacement;if(!s.matchParticipantsB.includes(replacement.id))s.matchParticipantsB.push(replacement.id)}
+  s.queue.push(injured);
+  s.injuryEvents.push({match:s.match,injured:{id:injured.id,name:injured.name},replacement:{id:replacement.id,name:replacement.name}});
+  save();render();toast(`${injured.name} saiu por lesão. ${replacement.name} entrou no lugar.`);
 }
 
 function undo(){
   const x=s.snapshots.pop();if(!x)return;
   const remaining=s.snapshots;
-  s={...s,...x,snapshots:remaining};save();render();toast('Último resultado desfeito.');
+  clearInterval(timerInterval);timerInterval=null;
+  s={...s,...x,snapshots:remaining};
+  if(s.timerRunning){s.timerStartedAt=Date.now();timerInterval=setInterval(updateTimer,500)}
+  save();render();toast('Último resultado desfeito.');
 }
 
 function reset(){
   if(!confirm('Apagar a noite atual e começar de novo?'))return;
-  s=blank();localStorage.removeItem('vilelasFutV2');render();
+  clearInterval(timerInterval);timerInterval=null;s=blank();localStorage.removeItem('vilelasFutV2');render();
 }
 
 function renderPlayers(){
@@ -224,29 +323,45 @@ function renderPlayers(){
   el.players.innerHTML=s.players.map((p,i)=>{
     const onCourt=s.started&&(s.courtA.some(x=>x.id===p.id)||s.courtB.some(x=>x.id===p.id));
     const inQueue=s.started&&s.queue.some(x=>x.id===p.id);
-    let action='';
-    if(!s.started)action=`<button class="remove" data-rm="${p.id}">Remover</button>`;
-    else if(onCourt)action='<span class="locked">EM QUADRA</span>';
-    else if(inQueue)action=`<button class="remove" data-rm="${p.id}">Desistiu</button>`;
-    return `<div class="player"><span class="num">${i+1}</span><span class="pname">${esc(p.name)}</span>${action}</div>`;
+    let action=`<button class="edit" data-edit="${p.id}">Editar</button>`;
+    if(!s.started)action+=`<button class="remove" data-rm="${p.id}">Remover</button>`;
+    else if(onCourt)action+=`<span class="locked">EM QUADRA</span><button class="injury" data-injury="${p.id}">Lesão</button>`;
+    else if(inQueue)action+=`<button class="remove" data-rm="${p.id}">Desistiu</button>`;
+    return `<div class="player"><span class="num">${i+1}</span><span class="pname">${esc(p.name)}</span><span class="playerActions">${action}</span></div>`;
   }).join('');
+  el.players.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>editPlayer(b.dataset.edit));
   el.players.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>removePlayer(b.dataset.rm));
+  el.players.querySelectorAll('[data-injury]').forEach(b=>b.onclick=()=>injury(b.dataset.injury));
 }
 
 function renderGame(){
   el.game.classList.toggle('hidden',!s.started);el.queueSec.classList.toggle('hidden',!s.started);el.historySec.classList.toggle('hidden',!s.started);
   if(!s.started)return;
   el.match.textContent=`Jogo ${s.match}`;
-  el.teamA.innerHTML=s.courtA.map(p=>`<li>${esc(p.name)}</li>`).join('');
-  el.teamB.innerHTML=s.courtB.map(p=>`<li>${esc(p.name)}</li>`).join('');
+  el.teamA.innerHTML=s.courtA.map(p=>`<li>${esc(p.name)} <button class="injury" data-injury="${p.id}">Lesão</button></li>`).join('');
+  el.teamB.innerHTML=s.courtB.map(p=>`<li>${esc(p.name)} <button class="injury" data-injury="${p.id}">Lesão</button></li>`).join('');
+  [...el.teamA.querySelectorAll('[data-injury]'),...el.teamB.querySelectorAll('[data-injury]')].forEach(b=>b.onclick=()=>injury(b.dataset.injury));
   el.streakA.textContent=`${s.streakA} vitória${s.streakA===1?'':'s'}`;
   el.streakB.textContent=`${s.streakB} vitória${s.streakB===1?'':'s'}`;
   el.undo.disabled=!s.snapshots.length;
+  el.timerToggle.textContent=s.timerRunning?'Pausar':(currentElapsed()>0?'Continuar':'Iniciar');
+  el.timerLimit.value=String(s.timerLimitMinutes||0);
+  updateTimer();
 }
 
 function renderQueue(){
   el.queueCount.textContent=`${s.queue.length} esperando`;
-  if(!s.queue.length){el.queue.innerHTML='<p style="color:#94a3b8;text-align:center">Ninguém na fila.</p>';return}
+  const next=s.queue.slice(0,5);
+  if(!s.queue.length){
+    el.nextTeamBox.innerHTML='<div class="nextTeamEmpty"><strong>Nenhum atleta aguardando</strong><span>O próximo time ainda não começou a ser formado.</span></div>';
+    el.queue.innerHTML='<p style="color:#94a3b8;text-align:center">Ninguém na fila.</p>';return
+  }
+  if(next.length===5){
+    el.nextTeamBox.innerHTML=`<div class="nextTeamReady"><div><small>PRÓXIMO TIME</small><strong>${next.map(p=>esc(p.name)).join(' · ')}</strong></div><span class="readyBadge">PRONTO</span></div>`;
+  }else{
+    const missing=5-next.length;
+    el.nextTeamBox.innerHTML=`<div class="nextTeamWaiting"><div><small>PRÓXIMO TIME</small><strong>${next.map(p=>esc(p.name)).join(' · ')}</strong></div><span class="missingBadge">Faltam ${missing}</span></div>`;
+  }
   let groups=[];for(let i=0;i<s.queue.length;i+=5)groups.push(s.queue.slice(i,i+5));
   el.queue.innerHTML=groups.map((g,gi)=>{
     const full=g.length===5;
@@ -262,13 +377,139 @@ function renderQueue(){
   el.queue.querySelectorAll('[data-qrm]').forEach(b=>b.onclick=()=>removePlayer(b.dataset.qrm));
 }
 
-function renderHistory(){
-  if(!s.history.length){el.history.innerHTML='<p style="color:#94a3b8;text-align:center">Nenhuma partida finalizada.</p>';return}
-  el.history.innerHTML=s.history.map(h=>`<div class="hist"><strong>Jogo ${h.match} · ${esc(h.text)}</strong><br><span>A: ${h.a.map(esc).join(', ')}</span><br><span>B: ${h.b.map(esc).join(', ')}</span></div>`).join('');
+function historyParticipants(h,side){
+  const rich=side==='A'?h.aParticipants:h.bParticipants;
+  if(Array.isArray(rich)&&rich.length)return rich;
+  const names=side==='A'?(h.a||[]):(h.b||[]);
+  return names.map(name=>({id:`legacy:${name}`,name}));
+}
+function computeStats(){
+  const map=new Map();
+  const ensure=p=>{const key=p.id||`legacy:${p.name}`;if(!map.has(key))map.set(key,{id:key,name:p.name,jogos:0,vitorias:0,empates:0,derrotas:0,lesoes:0,tetras:0});return map.get(key)};
+  s.players.forEach(ensure);
+  s.history.forEach(h=>{
+    const A=historyParticipants(h,'A'),B=historyParticipants(h,'B');
+    [...A,...B].forEach(p=>ensure(p).jogos++);
+    if(h.result==='win'||String(h.text||'').startsWith('Vitória')){
+      const winner=h.winner||((h.text||'').includes('Time A')?'A':'B');
+      A.forEach(p=>winner==='A'?ensure(p).vitorias++:ensure(p).derrotas++);
+      B.forEach(p=>winner==='B'?ensure(p).vitorias++:ensure(p).derrotas++);
+    }else{
+      A.forEach(p=>ensure(p).empates++);B.forEach(p=>ensure(p).empates++);
+    }
+  });
+  s.injuryEvents.forEach(e=>{if(e.injured)ensure(e.injured).lesoes++});
+  s.fourWinEvents.forEach(e=>(e.players||[]).forEach(p=>ensure(p).tetras++));
+  return [...map.values()].map(x=>({...x,aproveitamento:x.jogos?((x.vitorias*3+x.empates)/(x.jogos*3))*100:0})).sort((a,b)=>b.vitorias-a.vitorias||b.aproveitamento-a.aproveitamento||b.jogos-a.jogos||a.name.localeCompare(b.name,'pt-BR'));
+}
+function renderSummary(){
+  if(!el.summarySec)return;
+  el.summarySec.classList.toggle('hidden',!s.started);if(!s.started)return;
+  const stats=computeStats();
+  const totalDuration=s.history.reduce((sum,h)=>sum+Number(h.duration||0),0);
+  const maxStreak=Math.max(0,...s.history.map(h=>Number(h.streak||0)));
+  const known=new Set(stats.map(x=>x.id));
+  el.summaryGrid.innerHTML=`
+    <div class="summaryKpi"><span>Partidas</span><strong>${s.history.length}</strong></div>
+    <div class="summaryKpi"><span>Atletas</span><strong>${known.size}</strong></div>
+    <div class="summaryKpi"><span>Tempo jogado</span><strong>${fmtTime(totalDuration)}</strong></div>
+    <div class="summaryKpi"><span>Maior sequência</span><strong>${maxStreak} vitórias</strong></div>
+    <div class="summaryKpi"><span>Lesões</span><strong>${s.injuryEvents.length}</strong></div>
+    <div class="summaryKpi"><span>4 vitórias</span><strong>${s.fourWinEvents.length}</strong></div>`;
+  const active=stats.filter(x=>x.jogos>0||x.lesoes>0||x.tetras>0);
+  el.statsBody.innerHTML=active.length?active.map((x,i)=>`<tr><td><span class="rankPos">${i+1}</span>${esc(x.name)}</td><td>${x.jogos}</td><td>${x.vitorias}</td><td>${x.empates}</td><td>${x.derrotas}</td><td>${Math.round(x.aproveitamento)}%</td><td>${x.tetras}</td><td>${x.lesoes}</td></tr>`).join(''):'<tr><td colspan="8" class="emptyCell">As estatísticas aparecem após a primeira partida.</td></tr>';
+  el.fourWinList.innerHTML=s.fourWinEvents.length?s.fourWinEvents.slice().reverse().map(e=>`<div class="achievement">🔥 <strong>Jogo ${e.match}</strong> · ${e.players.map(p=>esc(p.name)).join(', ')}</div>`).join(''):'<p class="muted">Nenhuma sequência de 4 vitórias registrada ainda.</p>';
 }
 
-function render(){renderPlayers();renderGame();if(s.started){renderQueue();renderHistory()}save()}
+
+function renderScoreboard(){
+  if(!el.scoreboard)return;
+  el.scoreboardBtn.classList.toggle('hidden',!s.started);
+  if(!s.started)return;
+  el.scoreMatch.textContent=`Jogo ${s.match}`;
+  el.scoreTeamA.innerHTML=s.courtA.map(p=>`<li>${esc(p.name)}</li>`).join('');
+  el.scoreTeamB.innerHTML=s.courtB.map(p=>`<li>${esc(p.name)}</li>`).join('');
+  el.scoreStreakA.textContent=`${s.streakA} vitória${s.streakA===1?'':'s'}`;
+  el.scoreStreakB.textContent=`${s.streakB} vitória${s.streakB===1?'':'s'}`;
+  const next=s.queue.slice(0,5);
+  el.scoreNextTeam.textContent=next.length===5?next.map(p=>p.name).join(' · '):next.length?`${next.map(p=>p.name).join(' · ')} — faltam ${5-next.length}`:'Ninguém aguardando';
+  el.scoreTimerToggle.textContent=s.timerRunning?'Pausar':(currentElapsed()>0?'Continuar':'Iniciar');
+  updateTimer();
+}
+function openScoreboard(){if(!s.started){toast('Inicie a primeira partida antes de abrir o placar.');return}el.scoreboard.classList.remove('hidden');renderScoreboard()}
+function closeScoreboard(){el.scoreboard.classList.add('hidden');if(document.fullscreenElement)document.exitFullscreen().catch(()=>{})}
+async function toggleScoreFullscreen(){try{if(!document.fullscreenElement){await el.scoreboard.requestFullscreen?.()}else{await document.exitFullscreen?.()}}catch(e){toast('Tela cheia não disponível neste navegador.')}}
+
+function isStandalone(){return window.matchMedia?.('(display-mode: standalone)').matches||window.navigator.standalone===true}
+function showInstallHelp(){
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  el.installHelp.innerHTML=ios?'<p>No iPhone/iPad: toque no botão <strong>Compartilhar</strong> do Safari e escolha <strong>Adicionar à Tela de Início</strong>.</p>':'<p>No navegador, abra o menu e procure <strong>Instalar aplicativo</strong> ou <strong>Adicionar à tela inicial</strong>. No Chrome/Edge, o ícone de instalação também pode aparecer na barra de endereço.</p>';
+  el.installModal.classList.remove('hidden');
+}
+async function installApp(){
+  if(isStandalone()){toast('Vilelas Fut já está instalado como aplicativo.');return}
+  if(deferredInstallPrompt){
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice.catch(()=>null);
+    deferredInstallPrompt=null;
+    return;
+  }
+  showInstallHelp();
+}
+
+function roundRect(ctx,x,y,w,h,r,fill,stroke){
+  const rr=Math.min(r,w/2,h/2);ctx.beginPath();ctx.roundRect?ctx.roundRect(x,y,w,h,rr):(ctx.rect(x,y,w,h));
+  if(fill){ctx.fillStyle=fill;ctx.fill()}if(stroke){ctx.strokeStyle=stroke;ctx.stroke()}
+}
+function fitText(ctx,text,maxWidth,startSize,minSize=22){let size=startSize;while(size>minSize){ctx.font=`700 ${size}px Arial`;if(ctx.measureText(text).width<=maxWidth)break;size-=2}return size}
+function drawCard(){
+  if(!s.history.length){toast('Finalize pelo menos uma partida para gerar o card.');return null}
+  const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1350;const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#08111f';ctx.fillRect(0,0,1080,1350);
+  const grad=ctx.createLinearGradient(0,0,1080,0);grad.addColorStop(0,'#22c55e');grad.addColorStop(1,'#16a34a');ctx.fillStyle=grad;ctx.fillRect(0,0,1080,18);
+  ctx.fillStyle='#22c55e';ctx.font='800 26px Arial';ctx.fillText('QUINTA DO FUT',64,82);
+  ctx.fillStyle='#f8fafc';ctx.font='900 64px Arial';ctx.fillText('Vilelas Fut',64,148);
+  ctx.fillStyle='#94a3b8';ctx.font='28px Arial';ctx.fillText(`Resumo da noite · ${new Date().toLocaleDateString('pt-BR')}`,64,195);
+  const stats=computeStats();const totalDuration=s.history.reduce((sum,h)=>sum+Number(h.duration||0),0);const maxStreak=Math.max(0,...s.history.map(h=>Number(h.streak||0)));
+  const kpis=[['PARTIDAS',s.history.length],['ATLETAS',stats.length],['TEMPO',fmtTime(totalDuration)],['MAIOR SEQUÊNCIA',`${maxStreak} vit.`],['LESÕES',s.injuryEvents.length],['4 VITÓRIAS',s.fourWinEvents.length]];
+  kpis.forEach((k,i)=>{const col=i%3,row=Math.floor(i/3),x=64+col*318,y=245+row*142;roundRect(ctx,x,y,286,116,18,'#111827','#253147');ctx.fillStyle='#94a3b8';ctx.font='800 19px Arial';ctx.fillText(k[0],x+20,y+34);ctx.fillStyle='#f8fafc';ctx.font='900 38px Arial';ctx.fillText(String(k[1]),x+20,y+83)});
+  ctx.fillStyle='#22c55e';ctx.font='800 24px Arial';ctx.fillText('RANKING DA NOITE',64,560);
+  ctx.fillStyle='#f8fafc';ctx.font='900 38px Arial';ctx.fillText('Destaques individuais',64,608);
+  const active=stats.filter(x=>x.jogos>0||x.lesoes>0||x.tetras>0).slice(0,5);
+  active.forEach((x,i)=>{const y=646+i*106;roundRect(ctx,64,y,952,86,16,i===0?'#10271b':'#111827',i===0?'#166534':'#253147');ctx.fillStyle=i===0?'#86efac':'#cbd5e1';ctx.font='900 26px Arial';ctx.fillText(`${i+1}º`,86,y+51);ctx.fillStyle='#f8fafc';const fs=fitText(ctx,x.name,430,28,20);ctx.font=`800 ${fs}px Arial`;ctx.fillText(x.name,145,y+50);ctx.fillStyle='#94a3b8';ctx.font='700 21px Arial';ctx.fillText(`${x.jogos}J  ${x.vitorias}V  ${x.empates}E  ${x.derrotas}D`,600,y+36);ctx.fillStyle='#86efac';ctx.font='900 24px Arial';ctx.fillText(`${Math.round(x.aproveitamento)}%`,880,y+57)});
+  const footerY=1212;ctx.fillStyle='#94a3b8';ctx.font='22px Arial';ctx.fillText('Gerado pelo Vilelas Fut',64,footerY);ctx.fillStyle='#22c55e';ctx.font='800 22px Arial';ctx.textAlign='right';ctx.fillText('Desenvolvido por Paulo Victor',1016,footerY);ctx.textAlign='left';
+  return canvas;
+}
+function downloadBlob(blob,name){const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+async function shareNightCard(){
+  const canvas=drawCard();if(!canvas)return;
+  canvas.toBlob(async blob=>{
+    if(!blob){toast('Não foi possível gerar o card.');return}
+    const name=`vilelas-fut-${new Date().toISOString().slice(0,10)}.png`;const file=new File([blob],name,{type:'image/png'});
+    try{
+      if(navigator.share&&navigator.canShare?.({files:[file]})){await navigator.share({title:'Vilelas Fut · Resumo da noite',text:'Resumo da pelada no Vilelas Fut',files:[file]});return}
+    }catch(e){if(e?.name==='AbortError')return}
+    downloadBlob(blob,name);toast('Card baixado. Agora é só enviar no WhatsApp.');
+  },'image/png');
+}
+
+function registerPWA(){
+  if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
+  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e});
+  window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;toast('Vilelas Fut instalado com sucesso.');});
+}
+
+function renderHistory(){
+  if(!s.history.length){el.history.innerHTML='<p style="color:#94a3b8;text-align:center">Nenhuma partida finalizada.</p>';return}
+  el.history.innerHTML=s.history.map(h=>`<div class="hist"><strong>Jogo ${h.match} · ${esc(h.text)}${h.duration!=null?` · ${fmtTime(h.duration)}`:''}</strong><br><span>A: ${h.a.map(esc).join(', ')}</span><br><span>B: ${h.b.map(esc).join(', ')}</span></div>`).join('');
+}
+
+function render(){renderPlayers();renderGame();renderSummary();renderScoreboard();if(s.started){renderQueue();renderHistory()}save()}
 
 el.form.onsubmit=e=>{e.preventDefault();addPlayer(el.name.value);el.name.value='';el.name.focus()};
-el.start.onclick=start;el.aWin.onclick=()=>win('A');el.bWin.onclick=()=>win('B');el.draw.onclick=draw;el.undo.onclick=undo;el.reset.onclick=reset;
+el.start.onclick=start;el.aWin.onclick=()=>win('A');el.bWin.onclick=()=>win('B');el.draw.onclick=draw;el.undo.onclick=undo;el.reset.onclick=reset;el.timerToggle.onclick=toggleTimer;el.timerReset.onclick=manualResetTimer;el.timerLimit.onchange=setTimerLimit;el.rulesBtn.onclick=()=>el.rulesModal.classList.remove('hidden');el.rulesClose.onclick=()=>el.rulesModal.classList.add('hidden');el.rulesModal.onclick=e=>{if(e.target===el.rulesModal)el.rulesModal.classList.add('hidden')};
+el.installBtn.onclick=installApp;el.installClose.onclick=()=>el.installModal.classList.add('hidden');el.installModal.onclick=e=>{if(e.target===el.installModal)el.installModal.classList.add('hidden')};
+el.scoreboardBtn.onclick=openScoreboard;el.scoreClose.onclick=closeScoreboard;el.scoreFullscreen.onclick=toggleScoreFullscreen;el.scoreTimerToggle.onclick=toggleTimer;el.scoreAWin.onclick=()=>win('A');el.scoreBWin.onclick=()=>win('B');el.scoreDraw.onclick=draw;el.shareCardBtn.onclick=shareNightCard;
+if(s.timerRunning){s.timerStartedAt=Date.now();timerInterval=setInterval(updateTimer,500)}
+registerPWA();
 render();

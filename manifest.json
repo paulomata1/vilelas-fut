@@ -1,0 +1,15 @@
+{
+  "name": "Vilelas Fut",
+  "short_name": "Vilelas Fut",
+  "description": "Organização das partidas da Quinta do Fut: times, fila, cronômetro, estatísticas e placar.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#08111f",
+  "theme_color": "#0f172a",
+  "orientation": "any",
+  "icons": [
+    {"src":"icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ]
+}
