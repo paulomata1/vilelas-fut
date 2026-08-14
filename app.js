@@ -506,8 +506,8 @@ function roundRect(ctx,x,y,w,h,r,fill,stroke){
 function fitText(ctx,text,maxWidth,startSize,minSize=22){let size=startSize;while(size>minSize){ctx.font=`700 ${size}px Arial`;if(ctx.measureText(text).width<=maxWidth)break;size-=2}return size}
 function drawCard(){
   if(!s.history.length){toast('Finalize pelo menos uma partida para gerar o card.');return null}
-  const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=2220;const ctx=canvas.getContext('2d');
-  ctx.fillStyle='#08111f';ctx.fillRect(0,0,1080,2220);
+  const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=2280;const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#08111f';ctx.fillRect(0,0,1080,2280);
   const grad=ctx.createLinearGradient(0,0,1080,0);grad.addColorStop(0,'#22c55e');grad.addColorStop(1,'#16a34a');ctx.fillStyle=grad;ctx.fillRect(0,0,1080,18);
   ctx.fillStyle='#22c55e';ctx.font='800 26px Arial';ctx.fillText('QUINTA DO FUT',64,82);
   ctx.fillStyle='#f8fafc';ctx.font='900 64px Arial';ctx.fillText('Vilelas Fut',64,148);
@@ -537,7 +537,7 @@ function drawCard(){
     ctx.fillStyle='#94a3b8';ctx.font='22px Arial';ctx.fillText('Nenhum goleiro cadastrado nesta noite.',64,keeperY+92);
   }
   // Times que conseguiram 4 vitórias consecutivas
-  const fourY=1810;
+  const fourY=1870;
   ctx.fillStyle='#f97316';ctx.font='800 22px Arial';ctx.fillText('🔥 SEQUÊNCIAS DE 4 VITÓRIAS',64,fourY);
   if(s.fourWinEvents.length){
     s.fourWinEvents.slice(-3).reverse().forEach((e,i)=>{
@@ -554,7 +554,7 @@ function drawCard(){
     ctx.fillStyle='#94a3b8';ctx.font='22px Arial';ctx.fillText('Nenhum time conseguiu 4 vitórias seguidas nesta noite.',64,fourY+48);
   }
 
-  const footerY=2170;ctx.fillStyle='#94a3b8';ctx.font='22px Arial';ctx.fillText('Gerado pelo Vilelas Fut',64,footerY);ctx.fillStyle='#22c55e';ctx.font='800 22px Arial';ctx.textAlign='right';ctx.fillText('Desenvolvido por Paulo Victor',1016,footerY);ctx.textAlign='left';
+  const footerY=2230;ctx.fillStyle='#94a3b8';ctx.font='22px Arial';ctx.fillText('Gerado pelo Vilelas Fut',64,footerY);ctx.fillStyle='#22c55e';ctx.font='800 22px Arial';ctx.textAlign='right';ctx.fillText('Desenvolvido por Paulo Victor',1016,footerY);ctx.textAlign='left';
   return canvas;
 }
 
