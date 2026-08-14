@@ -506,8 +506,8 @@ function roundRect(ctx,x,y,w,h,r,fill,stroke){
 function fitText(ctx,text,maxWidth,startSize,minSize=22){let size=startSize;while(size>minSize){ctx.font=`700 ${size}px Arial`;if(ctx.measureText(text).width<=maxWidth)break;size-=2}return size}
 function drawCard(){
   if(!s.history.length){toast('Finalize pelo menos uma partida para gerar o card.');return null}
-  const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=2280;const ctx=canvas.getContext('2d');
-  ctx.fillStyle='#08111f';ctx.fillRect(0,0,1080,2280);
+  const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1800;const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#08111f';ctx.fillRect(0,0,1080,1800);
   const grad=ctx.createLinearGradient(0,0,1080,0);grad.addColorStop(0,'#22c55e');grad.addColorStop(1,'#16a34a');ctx.fillStyle=grad;ctx.fillRect(0,0,1080,18);
   ctx.fillStyle='#22c55e';ctx.font='800 26px Arial';ctx.fillText('QUINTA DO FUT',64,82);
   ctx.fillStyle='#f8fafc';ctx.font='900 64px Arial';ctx.fillText('Vilelas Fut',64,148);
@@ -516,7 +516,6 @@ function drawCard(){
   const keepers=keeperStats();
   const activeAll=stats.filter(x=>x.jogos>0||x.lesoes>0||x.tetras>0);
   const top5=activeAll.slice(0,5);
-  const worst5=[...activeAll].reverse().slice(0,5);
   const kpis=[['PARTIDAS',s.history.length],['ATLETAS',activeAll.length],['TEMPO',fmtTime(totalDuration)],['MAIOR SEQUÊNCIA',`${maxStreak} vit.`],['LESÕES',s.injuryEvents.length],['GOLEIROS',keepers.length]];
   kpis.forEach((k,i)=>{const col=i%3,row=Math.floor(i/3),x=64+col*318,y=245+row*128;roundRect(ctx,x,y,286,104,18,'#111827','#253147');ctx.fillStyle='#94a3b8';ctx.font='800 18px Arial';ctx.fillText(k[0],x+20,y+31);ctx.fillStyle='#f8fafc';ctx.font='900 34px Arial';ctx.fillText(String(k[1]),x+20,y+76)});
 
@@ -526,9 +525,8 @@ function drawCard(){
     items.forEach((x,i)=>{const y=startY+72+i*76;roundRect(ctx,64,y,952,62,14,best&&i===0?'#10271b':'#111827',best&&i===0?'#166534':'#253147');ctx.fillStyle=best&&i===0?'#86efac':'#cbd5e1';ctx.font='900 22px Arial';ctx.fillText(`${i+1}º`,84,y+39);ctx.fillStyle='#f8fafc';const fs=fitText(ctx,x.name,400,25,18);ctx.font=`800 ${fs}px Arial`;ctx.fillText(x.name,140,y+39);ctx.fillStyle='#94a3b8';ctx.font='700 18px Arial';ctx.fillText(`${x.jogos}J  ${x.vitorias}V  ${x.empates}E  ${x.derrotas}D`,575,y+27);ctx.fillStyle=best?'#86efac':'#fbbf24';ctx.font='900 21px Arial';ctx.fillText(`${Math.round(x.aproveitamento)}%`,888,y+42)});
   }
   drawPlayerSection('RANKING DA NOITE','Top 5 jogadores',top5,525,true);
-  drawPlayerSection('PARTE DE BAIXO DO RANKING','5 piores jogadores',worst5,1020,false);
 
-  const keeperY=1515;
+  const keeperY=1020;
   ctx.fillStyle='#38bdf8';ctx.font='800 22px Arial';ctx.fillText('🥅 RANKING DOS GOLEIROS',64,keeperY);
   ctx.fillStyle='#f8fafc';ctx.font='900 34px Arial';ctx.fillText('Defesas difíceis',64,keeperY+44);
   if(keepers.length){
@@ -537,7 +535,7 @@ function drawCard(){
     ctx.fillStyle='#94a3b8';ctx.font='22px Arial';ctx.fillText('Nenhum goleiro cadastrado nesta noite.',64,keeperY+92);
   }
   // Times que conseguiram 4 vitórias consecutivas
-  const fourY=1870;
+  const fourY=1375;
   ctx.fillStyle='#f97316';ctx.font='800 22px Arial';ctx.fillText('🔥 SEQUÊNCIAS DE 4 VITÓRIAS',64,fourY);
   if(s.fourWinEvents.length){
     s.fourWinEvents.slice(-3).reverse().forEach((e,i)=>{
@@ -554,7 +552,7 @@ function drawCard(){
     ctx.fillStyle='#94a3b8';ctx.font='22px Arial';ctx.fillText('Nenhum time conseguiu 4 vitórias seguidas nesta noite.',64,fourY+48);
   }
 
-  const footerY=2230;ctx.fillStyle='#94a3b8';ctx.font='22px Arial';ctx.fillText('Gerado pelo Vilelas Fut',64,footerY);ctx.fillStyle='#22c55e';ctx.font='800 22px Arial';ctx.textAlign='right';ctx.fillText('Desenvolvido por Paulo Victor',1016,footerY);ctx.textAlign='left';
+  const footerY=1750;ctx.fillStyle='#94a3b8';ctx.font='22px Arial';ctx.fillText('Gerado pelo Vilelas Fut',64,footerY);ctx.fillStyle='#22c55e';ctx.font='800 22px Arial';ctx.textAlign='right';ctx.fillText('Desenvolvido por Paulo Victor',1016,footerY);ctx.textAlign='left';
   return canvas;
 }
 

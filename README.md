@@ -7,7 +7,7 @@ Mantém todas as regras e recursos validados na V4 e adiciona:
 - Botão "Instalar" com suporte ao prompt do navegador e instruções quando necessário.
 - Modo Placar dedicado com times, sequência de vitórias, cronômetro, próximo time e controles de resultado.
 - Opção de tela cheia no modo placar.
-- Card da noite gerado em PNG (1080x1350) com resumo e Top 5 do ranking.
+- Card da noite gerado em PNG com resumo e destaques positivos da noite.
 - Compartilhamento nativo do card em celulares compatíveis (incluindo WhatsApp quando disponível no menu de compartilhamento).
 - Fallback para download do PNG quando o compartilhamento de arquivos não é suportado.
 - Tempo padrão de nova noite continua em 8 minutos.
@@ -29,10 +29,16 @@ Suba todos os arquivos, incluindo `manifest.json`, `service-worker.js` e a pasta
 - Cadastro separado de goleiros fixos da noite.
 - Registro de defesas difíceis com botão de correção.
 - Ranking dos goleiros por quantidade de defesas difíceis.
-- Card da noite em formato 1080x1920 com Top 5, 5 piores jogadores e ranking dos goleiros.
+- Card da noite com Top 5 e ranking dos goleiros, sem exibir os piores colocados.
 - Mantidos os ajustes responsivos do modo placar da V5.2.
 
 ## V5.4 · Sequências de 4 vitórias no Card da Noite
 - O Card da Noite agora mostra os times que alcançaram 4 vitórias consecutivas.
 - Cada registro mostra o número do jogo e os cinco atletas que formavam o time.
 - Quando houver várias sequências na noite, o card exibe as três mais recentes.
+
+
+## V5.4.2 · Card somente com destaques positivos
+- Removido do Card da Noite o ranking dos 5 piores jogadores.
+- Mantidos Top 5, ranking dos goleiros e sequências de 4 vitórias.
+- Layout do card foi recompactado após a remoção do bloco inferior do ranking.
