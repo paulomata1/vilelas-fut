@@ -293,3 +293,27 @@ body.scoreboardOpen{overflow:hidden;overscroll-behavior:none}
   .scoreKeeperItem{padding:3px 4px}
   .scoreKeeperAdd{height:23px}
 }
+
+
+/* V6.1 · avisos visíveis no modo placar */
+.toast{
+  z-index:10050;
+}
+body.scoreboardOpen .toast{
+  position:fixed;
+  left:50%;
+  bottom:max(18px, env(safe-area-inset-bottom));
+  transform:translateX(-50%) translateY(18px);
+  width:min(92vw,680px);
+  max-width:min(92vw,680px);
+  padding:14px 18px;
+  border:1px solid #22c55e;
+  background:rgba(2,6,23,.97);
+  box-shadow:0 14px 38px rgba(0,0,0,.42);
+  font-size:clamp(14px,2.3vw,18px);
+  font-weight:800;
+  line-height:1.25;
+}
+body.scoreboardOpen .toast.show{
+  transform:translateX(-50%) translateY(0);
+}

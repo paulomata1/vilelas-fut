@@ -52,3 +52,10 @@ Suba todos os arquivos, incluindo `manifest.json`, `service-worker.js` e a pasta
 - Quando aberto como PWA no iPhone, o botão mostra "Modo App ✓".
 - Android e desktop continuam usando a Fullscreen API normalmente.
 - Cache da PWA atualizado para V6.
+
+## V6.1
+- No Modo Placar, os goleiros permanecem na ordem fixa em que foram cadastrados.
+- A quantidade de defesas difíceis continua atualizando, mas não muda a posição dos botões.
+- O ranking dos goleiros na tela principal e no Card da Noite continua ordenado pelo desempenho.
+- Os avisos de rotação e regras agora aparecem acima do Modo Placar.
+- O tempo de exibição dos avisos foi aumentado para aproximadamente 3,6 segundos.
