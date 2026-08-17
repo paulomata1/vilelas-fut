@@ -349,3 +349,36 @@ body.scoreboardOpen .toast{
   position:relative;
   z-index:4;
 }
+
+
+/* V6.1.2 · botões principais maiores no Modo Placar */
+.scoreTimerToggle{
+  min-height:clamp(46px,6.2vh,60px);
+  padding:clamp(10px,1.5vh,15px) 18px;
+  font-size:clamp(15px,2vh,19px);
+  border-radius:12px;
+}
+.scoreControls button{
+  min-height:clamp(50px,6.8vh,64px);
+  padding:clamp(11px,1.6vh,16px) clamp(8px,1.5vw,16px);
+  font-size:clamp(14px,1.9vh,18px);
+  border-radius:12px;
+}
+
+@media (max-width:700px) and (orientation:portrait){
+  .scoreTimerToggle{
+    min-height:48px;
+    font-size:15px;
+    padding:10px 12px;
+  }
+  .scoreControls button{
+    min-height:52px;
+    font-size:14px;
+    padding:10px 5px;
+  }
+}
+
+@media (max-height:700px){
+  .scoreTimerToggle{min-height:42px;padding:7px 10px}
+  .scoreControls button{min-height:44px;padding:7px 5px}
+}

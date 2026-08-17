@@ -65,3 +65,9 @@ Suba todos os arquivos, incluindo `manifest.json`, `service-worker.js` e a pasta
 - O aviso agora fica na parte superior do placar e nunca captura eventos de toque.
 - Botões do placar receberam tratamento `touch-action: manipulation` para melhorar a resposta no Safari/PWA do iOS.
 - Nenhuma regra de fila, vitória, empate, cronômetro ou goleiros foi alterada.
+
+## V6.1.2
+- Aumentada a área de toque dos botões Iniciar/Continuar/Pausar no Modo Placar.
+- Aumentados os botões Vitória A, Empate e Vitória B para facilitar o uso no iPhone.
+- Mantida a responsividade para telas menores e aparelhos com pouca altura.
+- Nenhuma regra do jogo foi alterada.
