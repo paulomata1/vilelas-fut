@@ -2,11 +2,11 @@
 const E=id=>document.getElementById(id);
 const el={form:E('form'),name:E('name'),players:E('players'),count:E('count'),start:E('startBtn'),reset:E('resetBtn'),game:E('game'),queueSec:E('queueSec'),historySec:E('historySec'),summarySec:E('summarySec'),summaryGrid:E('summaryGrid'),statsBody:E('statsBody'),fourWinList:E('fourWinList'),teamA:E('teamA'),teamB:E('teamB'),streakA:E('streakA'),streakB:E('streakB'),match:E('match'),aWin:E('aWin'),bWin:E('bWin'),draw:E('draw'),undo:E('undo'),queue:E('queue'),queueCount:E('queueCount'),history:E('history'),toast:E('toast'),cadTitle:E('cadTitle'),cadSub:E('cadSub'),timer:E('timer'),timerToggle:E('timerToggle'),timerReset:E('timerReset'),rulesBtn:E('rulesBtn'),rulesModal:E('rulesModal'),rulesClose:E('rulesClose'),timerLimit:E('timerLimit'),nextTeamBox:E('nextTeamBox'),installBtn:E('installBtn'),installModal:E('installModal'),installClose:E('installClose'),installHelp:E('installHelp'),scoreboardBtn:E('scoreboardBtn'),scoreboard:E('scoreboard'),scoreClose:E('scoreClose'),scoreFullscreen:E('scoreFullscreen'),scoreMatch:E('scoreMatch'),scoreTimer:E('scoreTimer'),scoreTeamA:E('scoreTeamA'),scoreTeamB:E('scoreTeamB'),scoreStreakA:E('scoreStreakA'),scoreStreakB:E('scoreStreakB'),scoreNextTeam:E('scoreNextTeam'),scoreTimerToggle:E('scoreTimerToggle'),scoreAWin:E('scoreAWin'),scoreBWin:E('scoreBWin'),scoreDraw:E('scoreDraw'),shareCardBtn:E('shareCardBtn'),keeperForm:E('keeperForm'),keeperName:E('keeperName'),keeperList:E('keeperList'),keeperCount:E('keeperCount'),keeperRanking:E('keeperRanking'),scoreKeepers:E('scoreKeepers')};
 
-const blank=()=>({appVersion:6.1,goalkeepers:[],players:[],started:false,courtA:[],courtB:[],queue:[],streakA:0,streakB:0,match:1,history:[],snapshots:[],timerElapsed:0,timerRunning:false,timerStartedAt:null,timerLimitMinutes:8,timerAlerted:false,injuryEvents:[],fourWinEvents:[],matchParticipantsA:[],matchParticipantsB:[]});
+const blank=()=>({appVersion:6.11,goalkeepers:[],players:[],started:false,courtA:[],courtB:[],queue:[],streakA:0,streakB:0,match:1,history:[],snapshots:[],timerElapsed:0,timerRunning:false,timerStartedAt:null,timerLimitMinutes:8,timerAlerted:false,injuryEvents:[],fourWinEvents:[],matchParticipantsA:[],matchParticipantsB:[]});
 const loaded=load();
 let s={...blank(),...(loaded||{})};
 if(!loaded){s.timerLimitMinutes=8}
-if(Number(s.appVersion||0)<6.1)s.appVersion=6.1
+if(Number(s.appVersion||0)<6.11)s.appVersion=6.11
 s.injuryEvents=Array.isArray(s.injuryEvents)?s.injuryEvents:[];
 s.fourWinEvents=Array.isArray(s.fourWinEvents)?s.fourWinEvents:[];
 s.matchParticipantsA=Array.isArray(s.matchParticipantsA)?s.matchParticipantsA:[];

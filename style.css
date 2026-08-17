@@ -317,3 +317,35 @@ body.scoreboardOpen .toast{
 body.scoreboardOpen .toast.show{
   transform:translateX(-50%) translateY(0);
 }
+
+
+/* V6.1.1 · correção de toque no iPhone
+   O toast não pode interceptar os botões do placar, mesmo invisível. */
+.toast{
+  pointer-events:none !important;
+}
+body.scoreboardOpen .toast{
+  top:max(74px, calc(env(safe-area-inset-top) + 58px));
+  bottom:auto;
+  pointer-events:none !important;
+}
+
+/* Melhora a resposta de toque no Safari/iOS e evita gestos atrasados. */
+.scoreboard button,
+.scoreControls button,
+.scoreKeeperAdd,
+.scoreKeeperFix,
+.scoreTopActions button{
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
+  -webkit-user-select:none;
+}
+.scoreControls{
+  position:relative;
+  z-index:3;
+}
+.scoreControls button{
+  position:relative;
+  z-index:4;
+}

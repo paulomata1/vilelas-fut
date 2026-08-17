@@ -59,3 +59,9 @@ Suba todos os arquivos, incluindo `manifest.json`, `service-worker.js` e a pasta
 - O ranking dos goleiros na tela principal e no Card da Noite continua ordenado pelo desempenho.
 - Os avisos de rotação e regras agora aparecem acima do Modo Placar.
 - O tempo de exibição dos avisos foi aumentado para aproximadamente 3,6 segundos.
+
+## V6.1.1 · correção iPhone
+- Corrigida uma camada invisível do aviso (toast) que podia ficar sobre os controles do Modo Placar e bloquear toques no iPhone.
+- O aviso agora fica na parte superior do placar e nunca captura eventos de toque.
+- Botões do placar receberam tratamento `touch-action: manipulation` para melhorar a resposta no Safari/PWA do iOS.
+- Nenhuma regra de fila, vitória, empate, cronômetro ou goleiros foi alterada.
