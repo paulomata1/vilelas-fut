@@ -42,7 +42,7 @@ select{background:#0b1424;border:1px solid #334155;border-radius:10px;padding:9p
     max(10px,env(safe-area-inset-left));
   overflow:hidden;
   display:grid;
-  grid-template-rows:auto auto minmax(0,1fr) auto auto;
+  grid-template-rows:auto auto minmax(0,1fr) auto auto auto;
   gap:clamp(6px,1.2vh,14px);
 }
 .scoreboard.hidden{display:none!important}
@@ -153,3 +153,143 @@ select{background:#0b1424;border:1px solid #334155;border-radius:10px;padding:9p
 .keeperRow{display:grid;grid-template-columns:46px minmax(120px,1fr) auto auto;align-items:center;gap:10px;background:#0b1424;border:1px solid #26344b;border-radius:13px;padding:10px 11px}.keeperRow.keeperLeader{border-color:#0369a1;background:#0b1e2b}.keeperPos{font-weight:900;color:#7dd3fc;text-align:center}.keeperName{font-weight:800}.keeperSaves{color:#cbd5e1;font-size:12px;white-space:nowrap}.keeperSaves strong{font-size:20px;color:#f8fafc;margin-right:3px}.keeperActions{display:flex;gap:6px}.keeperSaveBtn,.keeperFixBtn,.keeperRemoveBtn{padding:8px 9px;font-size:11px;white-space:nowrap}.keeperRankingBox{margin-top:18px;background:#0b1424;border:1px solid #26344b;border-radius:13px;padding:12px}.keeperStatsHead{margin-top:0}.keeperRanking{display:grid;gap:7px;margin-top:10px}.keeperRankRow{display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:10px;padding:10px;border:1px solid #26344b;border-radius:10px;background:#101a2b}.keeperRankRow.keeperLeader{border-color:#0369a1;background:#0b1e2b}.keeperMedal{font-weight:900}.keeperRankRow span:last-child{color:#7dd3fc;font-weight:800;font-size:12px}
 @media(max-width:720px){.keeperRow{grid-template-columns:38px 1fr auto}.keeperSaves{grid-column:2/4}.keeperActions{grid-column:1/4;display:grid;grid-template-columns:1.4fr 1fr .9fr}.keeperActions button{width:100%}}
 @media(max-width:420px){.keeperRankRow{grid-template-columns:36px 1fr}.keeperRankRow span:last-child{grid-column:2}.keeperActions{grid-template-columns:1fr 1fr}.keeperRemoveBtn{grid-column:1/3}}
+
+
+/* V6 · goleiros no placar + modo app iPhone */
+body.scoreboardOpen{overflow:hidden;overscroll-behavior:none}
+
+.scoreKeepersBar{
+  min-height:0;
+  margin:0;
+  padding:clamp(6px,.85vh,10px) clamp(8px,1.4vw,14px);
+  border:1px solid #26344b;
+  border-radius:12px;
+  background:#0b1424;
+}
+.scoreKeepersBar>small{
+  display:block;
+  color:#22c55e;
+  font-size:clamp(8px,1vh,10px);
+  letter-spacing:.08em;
+  margin-bottom:clamp(4px,.55vh,6px);
+}
+.scoreKeepers{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+  gap:5px;
+  min-width:0;
+}
+.scoreKeeperItem{
+  min-width:0;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto 30px 30px;
+  align-items:center;
+  gap:5px;
+  border:1px solid #253147;
+  border-radius:9px;
+  padding:5px 6px;
+  background:#101a2b;
+}
+.scoreKeeperName{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-weight:800;
+  font-size:clamp(10px,1.35vh,14px);
+}
+.scoreKeeperValue{
+  color:#7dd3fc;
+  font-size:clamp(13px,1.7vh,18px);
+}
+.scoreKeeperAdd,.scoreKeeperFix{
+  width:30px;
+  height:28px;
+  padding:0;
+  border-radius:8px;
+  font-size:20px;
+  line-height:1;
+  font-weight:900;
+}
+.scoreKeeperAdd{
+  border:1px solid #166534;
+  background:#0d2b1b;
+  color:#86efac;
+}
+.scoreKeeperFix{
+  border:1px solid #334155;
+  background:#101827;
+  color:#cbd5e1;
+}
+.scoreKeeperFix:disabled{opacity:.3}
+.scoreKeeperEmpty{
+  grid-column:1/-1;
+  color:#94a3b8;
+  font-size:12px;
+  text-align:center;
+  padding:3px;
+}
+.iosInstallSteps{
+  margin:10px 0 10px 20px;
+  padding:0;
+  color:#cbd5e1;
+}
+.iosInstallSteps li{margin:8px 0}
+.installHint{
+  margin-top:12px;
+  padding:10px;
+  border:1px solid #166534;
+  border-radius:10px;
+  background:#0d2117;
+  color:#bbf7d0;
+}
+
+@media (max-width:700px) and (orientation:portrait){
+  .scoreboard{
+    grid-template-rows:auto auto minmax(0,1fr) auto auto auto;
+  }
+  .scoreKeepersBar{
+    padding:5px 6px;
+    border-radius:10px;
+  }
+  .scoreKeepersBar>small{
+    font-size:7px;
+    margin-bottom:3px;
+  }
+  .scoreKeepers{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:3px;
+  }
+  .scoreKeeperItem{
+    grid-template-columns:minmax(0,1fr) auto 26px;
+    gap:3px;
+    padding:4px;
+  }
+  .scoreKeeperName{
+    font-size:clamp(9px,2.45vw,11px);
+  }
+  .scoreKeeperValue{
+    font-size:12px;
+  }
+  .scoreKeeperAdd{
+    width:26px;
+    height:25px;
+    font-size:18px;
+  }
+  /* no placar móvel a correção fica disponível na tela principal,
+     preservando espaço para 3 goleiros lado a lado */
+  .scoreKeeperFix{display:none}
+}
+
+@media (max-width:390px) and (orientation:portrait){
+  .scoreKeepers{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .scoreKeeperName{font-size:9px}
+  .scoreKeeperItem{padding:3px}
+}
+
+@media (max-height:700px){
+  .scoreKeepersBar{padding:3px 5px}
+  .scoreKeepersBar>small{display:none}
+  .scoreKeeperItem{padding:3px 4px}
+  .scoreKeeperAdd{height:23px}
+}

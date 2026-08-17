@@ -1,12 +1,12 @@
 
 const E=id=>document.getElementById(id);
-const el={form:E('form'),name:E('name'),players:E('players'),count:E('count'),start:E('startBtn'),reset:E('resetBtn'),game:E('game'),queueSec:E('queueSec'),historySec:E('historySec'),summarySec:E('summarySec'),summaryGrid:E('summaryGrid'),statsBody:E('statsBody'),fourWinList:E('fourWinList'),teamA:E('teamA'),teamB:E('teamB'),streakA:E('streakA'),streakB:E('streakB'),match:E('match'),aWin:E('aWin'),bWin:E('bWin'),draw:E('draw'),undo:E('undo'),queue:E('queue'),queueCount:E('queueCount'),history:E('history'),toast:E('toast'),cadTitle:E('cadTitle'),cadSub:E('cadSub'),timer:E('timer'),timerToggle:E('timerToggle'),timerReset:E('timerReset'),rulesBtn:E('rulesBtn'),rulesModal:E('rulesModal'),rulesClose:E('rulesClose'),timerLimit:E('timerLimit'),nextTeamBox:E('nextTeamBox'),installBtn:E('installBtn'),installModal:E('installModal'),installClose:E('installClose'),installHelp:E('installHelp'),scoreboardBtn:E('scoreboardBtn'),scoreboard:E('scoreboard'),scoreClose:E('scoreClose'),scoreFullscreen:E('scoreFullscreen'),scoreMatch:E('scoreMatch'),scoreTimer:E('scoreTimer'),scoreTeamA:E('scoreTeamA'),scoreTeamB:E('scoreTeamB'),scoreStreakA:E('scoreStreakA'),scoreStreakB:E('scoreStreakB'),scoreNextTeam:E('scoreNextTeam'),scoreTimerToggle:E('scoreTimerToggle'),scoreAWin:E('scoreAWin'),scoreBWin:E('scoreBWin'),scoreDraw:E('scoreDraw'),shareCardBtn:E('shareCardBtn'),keeperForm:E('keeperForm'),keeperName:E('keeperName'),keeperList:E('keeperList'),keeperCount:E('keeperCount'),keeperRanking:E('keeperRanking')};
+const el={form:E('form'),name:E('name'),players:E('players'),count:E('count'),start:E('startBtn'),reset:E('resetBtn'),game:E('game'),queueSec:E('queueSec'),historySec:E('historySec'),summarySec:E('summarySec'),summaryGrid:E('summaryGrid'),statsBody:E('statsBody'),fourWinList:E('fourWinList'),teamA:E('teamA'),teamB:E('teamB'),streakA:E('streakA'),streakB:E('streakB'),match:E('match'),aWin:E('aWin'),bWin:E('bWin'),draw:E('draw'),undo:E('undo'),queue:E('queue'),queueCount:E('queueCount'),history:E('history'),toast:E('toast'),cadTitle:E('cadTitle'),cadSub:E('cadSub'),timer:E('timer'),timerToggle:E('timerToggle'),timerReset:E('timerReset'),rulesBtn:E('rulesBtn'),rulesModal:E('rulesModal'),rulesClose:E('rulesClose'),timerLimit:E('timerLimit'),nextTeamBox:E('nextTeamBox'),installBtn:E('installBtn'),installModal:E('installModal'),installClose:E('installClose'),installHelp:E('installHelp'),scoreboardBtn:E('scoreboardBtn'),scoreboard:E('scoreboard'),scoreClose:E('scoreClose'),scoreFullscreen:E('scoreFullscreen'),scoreMatch:E('scoreMatch'),scoreTimer:E('scoreTimer'),scoreTeamA:E('scoreTeamA'),scoreTeamB:E('scoreTeamB'),scoreStreakA:E('scoreStreakA'),scoreStreakB:E('scoreStreakB'),scoreNextTeam:E('scoreNextTeam'),scoreTimerToggle:E('scoreTimerToggle'),scoreAWin:E('scoreAWin'),scoreBWin:E('scoreBWin'),scoreDraw:E('scoreDraw'),shareCardBtn:E('shareCardBtn'),keeperForm:E('keeperForm'),keeperName:E('keeperName'),keeperList:E('keeperList'),keeperCount:E('keeperCount'),keeperRanking:E('keeperRanking'),scoreKeepers:E('scoreKeepers')};
 
-const blank=()=>({appVersion:5.4,goalkeepers:[],players:[],started:false,courtA:[],courtB:[],queue:[],streakA:0,streakB:0,match:1,history:[],snapshots:[],timerElapsed:0,timerRunning:false,timerStartedAt:null,timerLimitMinutes:8,timerAlerted:false,injuryEvents:[],fourWinEvents:[],matchParticipantsA:[],matchParticipantsB:[]});
+const blank=()=>({appVersion:6,goalkeepers:[],players:[],started:false,courtA:[],courtB:[],queue:[],streakA:0,streakB:0,match:1,history:[],snapshots:[],timerElapsed:0,timerRunning:false,timerStartedAt:null,timerLimitMinutes:8,timerAlerted:false,injuryEvents:[],fourWinEvents:[],matchParticipantsA:[],matchParticipantsB:[]});
 const loaded=load();
 let s={...blank(),...(loaded||{})};
 if(!loaded){s.timerLimitMinutes=8}
-if(Number(s.appVersion||0)<5.3)s.appVersion=5.3
+if(Number(s.appVersion||0)<6)s.appVersion=6
 s.injuryEvents=Array.isArray(s.injuryEvents)?s.injuryEvents:[];
 s.fourWinEvents=Array.isArray(s.fourWinEvents)?s.fourWinEvents:[];
 s.matchParticipantsA=Array.isArray(s.matchParticipantsA)?s.matchParticipantsA:[];
@@ -468,24 +468,124 @@ function renderScoreboard(){
   if(!el.scoreboard)return;
   el.scoreboardBtn.classList.toggle('hidden',!s.started);
   if(!s.started)return;
+
   el.scoreMatch.textContent=`Jogo ${s.match}`;
   el.scoreTeamA.innerHTML=s.courtA.map(p=>`<li>${esc(p.name)}</li>`).join('');
   el.scoreTeamB.innerHTML=s.courtB.map(p=>`<li>${esc(p.name)}</li>`).join('');
   el.scoreStreakA.textContent=`${s.streakA} vitória${s.streakA===1?'':'s'}`;
   el.scoreStreakB.textContent=`${s.streakB} vitória${s.streakB===1?'':'s'}`;
+
   const next=s.queue.slice(0,5);
-  el.scoreNextTeam.textContent=next.length===5?next.map(p=>p.name).join(' · '):next.length?`${next.map(p=>p.name).join(' · ')} — faltam ${5-next.length}`:'Ninguém aguardando';
+  el.scoreNextTeam.textContent=next.length===5
+    ?next.map(p=>p.name).join(' · ')
+    :next.length?`${next.map(p=>p.name).join(' · ')} — faltam ${5-next.length}`:'Ninguém aguardando';
+
+  // V6 · goleiros no modo placar
+  if(el.scoreKeepers){
+    const keepers=keeperStats();
+    if(!keepers.length){
+      el.scoreKeepers.innerHTML='<span class="scoreKeeperEmpty">🥅 Nenhum goleiro cadastrado</span>';
+    }else{
+      el.scoreKeepers.innerHTML=keepers.slice(0,4).map(k=>`
+        <div class="scoreKeeperItem">
+          <span class="scoreKeeperName">🧤 ${esc(k.name)}</span>
+          <strong class="scoreKeeperValue">${k.difficultSaves}</strong>
+          <button class="scoreKeeperAdd" data-score-ksave="${k.id}" aria-label="Adicionar defesa difícil para ${esc(k.name)}">+</button>
+          <button class="scoreKeeperFix" data-score-kfix="${k.id}" ${k.difficultSaves<=0?'disabled':''} aria-label="Corrigir defesa de ${esc(k.name)}">−</button>
+        </div>`).join('');
+
+      el.scoreKeepers.querySelectorAll('[data-score-ksave]').forEach(b=>{
+        b.onclick=()=>{
+          changeKeeperSave(b.dataset.scoreKsave,1);
+          renderScoreboard();
+        };
+      });
+      el.scoreKeepers.querySelectorAll('[data-score-kfix]').forEach(b=>{
+        b.onclick=()=>{
+          changeKeeperSave(b.dataset.scoreKfix,-1);
+          renderScoreboard();
+        };
+      });
+    }
+  }
+
   el.scoreTimerToggle.textContent=s.timerRunning?'Pausar':(currentElapsed()>0?'Continuar':'Iniciar');
+
+  const ios=isIOS();
+  if(ios){
+    el.scoreFullscreen.textContent=isStandalone()?'Modo App ✓':'Modo App';
+    el.scoreFullscreen.title=isStandalone()
+      ?'O Vilelas Fut já está aberto como aplicativo.'
+      :'No iPhone, instale/abra pela Tela de Início para usar sem a barra do Safari.';
+  }else{
+    el.scoreFullscreen.textContent=document.fullscreenElement?'Sair da tela cheia':'Tela cheia';
+  }
+
   updateTimer();
 }
-function openScoreboard(){if(!s.started){toast('Inicie a primeira partida antes de abrir o placar.');return}el.scoreboard.classList.remove('hidden');renderScoreboard()}
-function closeScoreboard(){el.scoreboard.classList.add('hidden');if(document.fullscreenElement)document.exitFullscreen().catch(()=>{})}
-async function toggleScoreFullscreen(){try{if(!document.fullscreenElement){await el.scoreboard.requestFullscreen?.()}else{await document.exitFullscreen?.()}}catch(e){toast('Tela cheia não disponível neste navegador.')}}
+function openScoreboard(){
+  if(!s.started){toast('Inicie a primeira partida antes de abrir o placar.');return}
+  el.scoreboard.classList.remove('hidden');
+  document.body.classList.add('scoreboardOpen');
+  renderScoreboard();
+}
+function closeScoreboard(){
+  el.scoreboard.classList.add('hidden');
+  document.body.classList.remove('scoreboardOpen');
+  if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});
+}
+function isIOS(){
+  return /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+    (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+}
+function isStandalone(){
+  return window.matchMedia?.('(display-mode: standalone)').matches||window.navigator.standalone===true;
+}
+async function toggleScoreFullscreen(){
+  // Safari no iPhone não oferece Fullscreen API para páginas comuns.
+  // No iOS, direcionamos o usuário para o modo PWA/standalone.
+  if(isIOS()){
+    if(isStandalone()){
+      toast('Modo App ativo: o placar já está usando toda a área disponível do iPhone.');
+    }else{
+      showInstallHelp(true);
+    }
+    return;
+  }
 
-function isStandalone(){return window.matchMedia?.('(display-mode: standalone)').matches||window.navigator.standalone===true}
-function showInstallHelp(){
-  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
-  el.installHelp.innerHTML=ios?'<p>No iPhone/iPad: toque no botão <strong>Compartilhar</strong> do Safari e escolha <strong>Adicionar à Tela de Início</strong>.</p>':'<p>No navegador, abra o menu e procure <strong>Instalar aplicativo</strong> ou <strong>Adicionar à tela inicial</strong>. No Chrome/Edge, o ícone de instalação também pode aparecer na barra de endereço.</p>';
+  try{
+    if(!document.fullscreenElement){
+      if(!el.scoreboard.requestFullscreen){
+        toast('Tela cheia não disponível neste navegador.');
+        return;
+      }
+      await el.scoreboard.requestFullscreen();
+    }else{
+      await document.exitFullscreen?.();
+    }
+    renderScoreboard();
+  }catch(e){
+    toast('Tela cheia não disponível neste navegador.');
+  }
+}
+
+function showInstallHelp(fromScoreboard=false){
+  const ios=isIOS();
+  if(ios){
+    el.installHelp.innerHTML=`
+      <p><strong>Modo App no iPhone</strong></p>
+      <p>O Safari do iPhone não coloca uma página comum em tela cheia pelo botão do site.</p>
+      <p>Para usar o Vilelas Fut ocupando praticamente toda a tela:</p>
+      <ol class="iosInstallSteps">
+        <li>Abra o Vilelas Fut no <strong>Safari</strong>.</li>
+        <li>Toque em <strong>Compartilhar</strong>.</li>
+        <li>Escolha <strong>Adicionar à Tela de Início</strong>.</li>
+        <li>Abra o Vilelas Fut pelo ícone criado na Tela de Início.</li>
+      </ol>
+      ${fromScoreboard?'<p class="installHint">Depois disso, entre novamente no Modo Placar. O botão aparecerá como <strong>Modo App ✓</strong>.</p>':''}`;
+  }else{
+    el.installHelp.innerHTML='<p>No navegador, abra o menu e procure <strong>Instalar aplicativo</strong> ou <strong>Adicionar à tela inicial</strong>. No Chrome/Edge, o ícone de instalação também pode aparecer na barra de endereço.</p>';
+  }
   el.installModal.classList.remove('hidden');
 }
 async function installApp(){

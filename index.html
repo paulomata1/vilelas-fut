@@ -160,7 +160,7 @@
       <h3>Edição de nome</h3><p>O nome de qualquer atleta pode ser corrigido sem alterar sua posição na fila ou no time.</p>
       <h3>Estatísticas da noite</h3><p>As partidas alimentam automaticamente o resumo e o ranking individual. Vitória vale 3 pontos, empate vale 1 e derrota vale 0 para o cálculo de aproveitamento. Em caso de lesão, o atleta que participou antes da substituição e o substituto contam como participantes daquela partida.</p>
       <h3>Goleiros fixos</h3><p>Os goleiros são cadastrados separadamente porque atuam independentemente dos times em quadra. Cada defesa difícil pode ser registrada durante a noite e o ranking dos goleiros é ordenado pela quantidade de defesas difíceis. O botão Corrigir remove uma defesa em caso de lançamento errado.</p>
-      <h3>Modo placar</h3><p>O modo placar mostra em tela dedicada os times em quadra, sequência de vitórias, cronômetro, próximo time e controles principais da partida. Pode ser colocado em tela cheia.</p>
+      <h3>Modo placar</h3><p>O modo placar mostra os times em quadra, sequência de vitórias, cronômetro, próximo time, controles principais e registro rápido de defesas difíceis dos goleiros. No iPhone, o botão Modo App orienta a abrir o PWA pela Tela de Início, pois o Safari não oferece tela cheia tradicional para páginas comuns.</p>
       <h3>Card da noite</h3><p>O app gera uma imagem com o resumo da noite, Top 5 jogadores, ranking dos goleiros por defesas difíceis e sequências de 4 vitórias. Em celulares compatíveis, o compartilhamento nativo permite enviar diretamente para aplicativos como WhatsApp; nos demais casos, o PNG é baixado.</p>
     </div>
   </div>
@@ -183,6 +183,10 @@
     <div class="scoreTeam"><div class="scoreTeamHead"><h2>TIME A</h2><span id="scoreStreakA" class="streak">0 vitórias</span></div><ol id="scoreTeamA"></ol></div>
     <div class="scoreX">×</div>
     <div class="scoreTeam"><div class="scoreTeamHead"><h2>TIME B</h2><span id="scoreStreakB" class="streak">0 vitórias</span></div><ol id="scoreTeamB"></ol></div>
+  </div>
+  <div class="scoreKeepersBar">
+    <small>🥅 GOLEIROS · DEFESAS DIFÍCEIS</small>
+    <div id="scoreKeepers" class="scoreKeepers"></div>
   </div>
   <div class="scoreNext"><small>PRÓXIMO TIME</small><div id="scoreNextTeam">Aguardando...</div></div>
   <div class="scoreControls">

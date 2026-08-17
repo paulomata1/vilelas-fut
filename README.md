@@ -42,3 +42,13 @@ Suba todos os arquivos, incluindo `manifest.json`, `service-worker.js` e a pasta
 - Removido do Card da Noite o ranking dos 5 piores jogadores.
 - Mantidos Top 5, ranking dos goleiros e sequências de 4 vitórias.
 - Layout do card foi recompactado após a remoção do bloco inferior do ranking.
+
+## V6
+- Registro de defesas difíceis diretamente no Modo Placar.
+- A faixa de goleiros usa o mesmo contador do ranking e do Card da Noite.
+- No placar móvel, o botão + registra a defesa rapidamente; correções continuam disponíveis na tela principal para preservar espaço.
+- Tratamento específico para iPhone: o botão "Tela cheia" vira "Modo App".
+- No Safari do iPhone, o app orienta a usar "Adicionar à Tela de Início".
+- Quando aberto como PWA no iPhone, o botão mostra "Modo App ✓".
+- Android e desktop continuam usando a Fullscreen API normalmente.
+- Cache da PWA atualizado para V6.
