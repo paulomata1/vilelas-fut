@@ -1,17 +1,18 @@
 
 const E=id=>document.getElementById(id);
-const el={form:E('form'),name:E('name'),players:E('players'),count:E('count'),start:E('startBtn'),reset:E('resetBtn'),game:E('game'),queueSec:E('queueSec'),historySec:E('historySec'),summarySec:E('summarySec'),summaryGrid:E('summaryGrid'),statsBody:E('statsBody'),fourWinList:E('fourWinList'),teamA:E('teamA'),teamB:E('teamB'),streakA:E('streakA'),streakB:E('streakB'),match:E('match'),aWin:E('aWin'),bWin:E('bWin'),draw:E('draw'),undo:E('undo'),queue:E('queue'),queueCount:E('queueCount'),history:E('history'),toast:E('toast'),cadTitle:E('cadTitle'),cadSub:E('cadSub'),timer:E('timer'),timerToggle:E('timerToggle'),timerReset:E('timerReset'),rulesBtn:E('rulesBtn'),rulesModal:E('rulesModal'),rulesClose:E('rulesClose'),timerLimit:E('timerLimit'),nextTeamBox:E('nextTeamBox'),installBtn:E('installBtn'),installModal:E('installModal'),installClose:E('installClose'),installHelp:E('installHelp'),scoreboardBtn:E('scoreboardBtn'),scoreboard:E('scoreboard'),scoreClose:E('scoreClose'),scoreFullscreen:E('scoreFullscreen'),scoreMatch:E('scoreMatch'),scoreTimer:E('scoreTimer'),scoreTeamA:E('scoreTeamA'),scoreTeamB:E('scoreTeamB'),scoreStreakA:E('scoreStreakA'),scoreStreakB:E('scoreStreakB'),scoreNextTeam:E('scoreNextTeam'),scoreTimerToggle:E('scoreTimerToggle'),scoreAWin:E('scoreAWin'),scoreBWin:E('scoreBWin'),scoreDraw:E('scoreDraw'),shareCardBtn:E('shareCardBtn'),keeperForm:E('keeperForm'),keeperName:E('keeperName'),keeperList:E('keeperList'),keeperCount:E('keeperCount'),keeperRanking:E('keeperRanking'),scoreKeepers:E('scoreKeepers')};
+const el={form:E('form'),name:E('name'),players:E('players'),count:E('count'),start:E('startBtn'),reset:E('resetBtn'),game:E('game'),queueSec:E('queueSec'),historySec:E('historySec'),summarySec:E('summarySec'),summaryGrid:E('summaryGrid'),statsBody:E('statsBody'),fourWinList:E('fourWinList'),teamA:E('teamA'),teamB:E('teamB'),streakA:E('streakA'),streakB:E('streakB'),match:E('match'),aWin:E('aWin'),bWin:E('bWin'),draw:E('draw'),undo:E('undo'),queue:E('queue'),queueCount:E('queueCount'),history:E('history'),toast:E('toast'),cadTitle:E('cadTitle'),cadSub:E('cadSub'),timer:E('timer'),timerToggle:E('timerToggle'),timerReset:E('timerReset'),rulesBtn:E('rulesBtn'),rulesModal:E('rulesModal'),rulesClose:E('rulesClose'),timerLimit:E('timerLimit'),nextTeamBox:E('nextTeamBox'),installBtn:E('installBtn'),installModal:E('installModal'),installClose:E('installClose'),installHelp:E('installHelp'),scoreboardBtn:E('scoreboardBtn'),scoreboard:E('scoreboard'),scoreClose:E('scoreClose'),scoreFullscreen:E('scoreFullscreen'),scoreMatch:E('scoreMatch'),scoreTimer:E('scoreTimer'),scoreTeamA:E('scoreTeamA'),scoreTeamB:E('scoreTeamB'),scoreStreakA:E('scoreStreakA'),scoreStreakB:E('scoreStreakB'),scoreNextTeam:E('scoreNextTeam'),scoreTimerToggle:E('scoreTimerToggle'),scoreAWin:E('scoreAWin'),scoreBWin:E('scoreBWin'),scoreDraw:E('scoreDraw'),shareCardBtn:E('shareCardBtn'),shareRankingBtn:E('shareRankingBtn'),resultModal:E('resultModal'),resultTitle:E('resultTitle'),resultDescription:E('resultDescription'),resultCancel:E('resultCancel'),resultConfirm:E('resultConfirm'),keeperForm:E('keeperForm'),keeperName:E('keeperName'),keeperList:E('keeperList'),keeperCount:E('keeperCount'),keeperRanking:E('keeperRanking'),scoreKeepers:E('scoreKeepers')};
 
-const blank=()=>({appVersion:6.11,goalkeepers:[],players:[],started:false,courtA:[],courtB:[],queue:[],streakA:0,streakB:0,match:1,history:[],snapshots:[],timerElapsed:0,timerRunning:false,timerStartedAt:null,timerLimitMinutes:8,timerAlerted:false,injuryEvents:[],fourWinEvents:[],matchParticipantsA:[],matchParticipantsB:[]});
+const blank=()=>({appVersion:6.21,pendingFourSide:null,goalkeepers:[],players:[],started:false,courtA:[],courtB:[],queue:[],streakA:0,streakB:0,match:1,history:[],snapshots:[],timerElapsed:0,timerRunning:false,timerStartedAt:null,timerLimitMinutes:8,timerAlerted:false,injuryEvents:[],fourWinEvents:[],matchParticipantsA:[],matchParticipantsB:[]});
 const loaded=load();
 let s={...blank(),...(loaded||{})};
 if(!loaded){s.timerLimitMinutes=8}
-if(Number(s.appVersion||0)<6.11)s.appVersion=6.11
+if(Number(s.appVersion||0)<6.21)s.appVersion=6.21
 s.injuryEvents=Array.isArray(s.injuryEvents)?s.injuryEvents:[];
 s.fourWinEvents=Array.isArray(s.fourWinEvents)?s.fourWinEvents:[];
 s.matchParticipantsA=Array.isArray(s.matchParticipantsA)?s.matchParticipantsA:[];
 s.matchParticipantsB=Array.isArray(s.matchParticipantsB)?s.matchParticipantsB:[];
 s.goalkeepers=Array.isArray(s.goalkeepers)?s.goalkeepers:[];
+s.pendingFourSide=s.pendingFourSide||null;
 let timerInterval=null;
 let deferredInstallPrompt=null;
 
@@ -20,11 +21,29 @@ function save(){localStorage.setItem('vilelasFutV2',JSON.stringify(s))}
 function id(){return Math.random().toString(36).slice(2)+Date.now().toString(36)}
 function esc(v){return String(v).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;")}
 function toast(t){el.toast.textContent=t;el.toast.classList.add('show');setTimeout(()=>el.toast.classList.remove('show'),3600)}
+let pendingResult=null;
+function requestResult(kind){
+  if(!s.started)return;
+  if(s.pendingFourSide){toast('Aguardando completar 5 atletas na fila para a saída do tetracampeão.');return;}
+  pendingResult=kind;
+  const labels={A:'Vitória do Time A',B:'Vitória do Time B',draw:'Empate'};
+  el.resultTitle.textContent=`Confirmar ${labels[kind]}?`;
+  el.resultDescription.textContent=`Jogo ${s.match} · O resultado será registrado e a fila de times será atualizada. Confira antes de confirmar.`;
+  el.resultModal.classList.remove('hidden');
+  el.resultConfirm.focus();
+}
+function closeResultModal(){pendingResult=null;el.resultModal.classList.add('hidden')}
+function confirmResult(){
+  const kind=pendingResult;
+  closeResultModal();
+  if(kind==='A'||kind==='B')win(kind);
+  else if(kind==='draw')draw();
+}
 function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
 function snap(){
   s.snapshots.push(JSON.parse(JSON.stringify({
-    players:s.players,started:s.started,courtA:s.courtA,courtB:s.courtB,queue:s.queue,
+    players:s.players,goalkeepers:s.goalkeepers,pendingFourSide:s.pendingFourSide,started:s.started,courtA:s.courtA,courtB:s.courtB,queue:s.queue,
     streakA:s.streakA,streakB:s.streakB,match:s.match,history:s.history,timerElapsed:currentElapsed(),timerRunning:s.timerRunning,timerStartedAt:s.timerRunning?Date.now():null,timerLimitMinutes:s.timerLimitMinutes,timerAlerted:s.timerAlerted,injuryEvents:s.injuryEvents,fourWinEvents:s.fourWinEvents,matchParticipantsA:s.matchParticipantsA,matchParticipantsB:s.matchParticipantsB
   })));
   if(s.snapshots.length>20)s.snapshots.shift();
@@ -50,11 +69,29 @@ function keeperStats(){
   return [...s.goalkeepers].map(k=>({...k,difficultSaves:Number(k.difficultSaves||0)})).sort((a,b)=>b.difficultSaves-a.difficultSaves||a.name.localeCompare(b.name,'pt-BR'));
 }
 
+// Quando não há 5 atletas para substituir o tetracampeão, aguardamos
+// novas chegadas sem iniciar outra partida com o mesmo time de 4 vitórias.
+function resolvePendingFour(){
+  if(!s.pendingFourSide||s.queue.length<5)return false;
+  const side=s.pendingFourSide;
+  const winner=side==='A'?s.courtA:s.courtB;
+  const loser=side==='A'?s.courtB:s.courtA;
+  const next=s.queue.splice(0,5);
+  s.queue.push(...winner);
+  if(side==='A'){s.courtA=next;s.courtB=loser}
+  else{s.courtA=loser;s.courtB=next}
+  s.streakA=0;s.streakB=0;s.pendingFourSide=null;
+  setParticipantsForCurrentMatch();
+  toast('Fila completa: tetracampeão saiu e o próximo time entrou.');
+  return true;
+}
+
 function addPlayer(name){
   name=name.trim(); if(!name)return;
   const p={id:id(),name};
   s.players.push(p);
   if(s.started)s.queue.push(p); // chega depois -> final da fila
+  resolvePendingFour();
   save();render();
   toast(s.started?`${name} entrou no final da fila.`:`${name} adicionado.`);
 }
@@ -98,7 +135,7 @@ function start(){
   if(s.players.length<10)return;
   const first=shuffle(s.players.slice(0,10));
   s.courtA=first.slice(0,5); s.courtB=first.slice(5);
-  s.queue=s.players.slice(10); s.started=true;s.streakA=0;s.streakB=0;s.match=1;s.history=[];s.snapshots=[];s.timerElapsed=0;s.timerRunning=false;s.timerStartedAt=null;s.timerAlerted=false;s.injuryEvents=[];s.fourWinEvents=[];s.matchParticipantsA=s.courtA.map(p=>p.id);s.matchParticipantsB=s.courtB.map(p=>p.id);
+  s.queue=s.players.slice(10); s.started=true;s.pendingFourSide=null;s.streakA=0;s.streakB=0;s.match=1;s.history=[];s.snapshots=[];s.timerElapsed=0;s.timerRunning=false;s.timerStartedAt=null;s.timerAlerted=false;s.injuryEvents=[];s.fourWinEvents=[];s.matchParticipantsA=s.courtA.map(p=>p.id);s.matchParticipantsB=s.courtB.map(p=>p.id);
   save();render();toast('Primeira partida sorteada.');
 }
 
@@ -148,13 +185,14 @@ function checkTimerLimit(){
 function updateTimer(){const value=fmtTime(currentElapsed());if(el.timer)el.timer.textContent=value;if(el.scoreTimer)el.scoreTimer.textContent=value;checkTimerLimit()}
 function pauseTimer(){if(s.timerRunning){s.timerElapsed=currentElapsed();s.timerRunning=false;s.timerStartedAt=null;save()}clearInterval(timerInterval);timerInterval=null;updateTimer()}
 function resetTimerForNext(){pauseTimer();s.timerElapsed=0;s.timerAlerted=false;updateTimer()}
-function toggleTimer(){if(!s.started)return;if(s.timerRunning){pauseTimer();render()}else{s.timerRunning=true;s.timerStartedAt=Date.now();timerInterval=setInterval(updateTimer,500);save();render()}}
+function toggleTimer(){if(!s.started)return;if(s.pendingFourSide){toast('Aguarde completar o próximo time.');return;}if(s.timerRunning){pauseTimer();render()}else{s.timerRunning=true;s.timerStartedAt=Date.now();timerInterval=setInterval(updateTimer,500);save();render()}}
 function manualResetTimer(){if(s.timerRunning&&!confirm('Zerar o cronômetro enquanto ele está rodando?'))return;s.timerElapsed=0;s.timerStartedAt=s.timerRunning?Date.now():null;s.timerAlerted=false;save();updateTimer()}
 function setTimerLimit(){s.timerLimitMinutes=Number(el.timerLimit.value||0);s.timerAlerted=false;save();updateTimer();toast(s.timerLimitMinutes?`Alerta configurado para ${s.timerLimitMinutes} minutos.`:'Cronômetro sem limite de tempo.');}
 
 function take5(){return s.queue.length>=5?s.queue.splice(0,5):null}
 
 function win(side){
+  if(s.pendingFourSide){toast('Aguarde a substituição do tetracampeão.');return}
   snap();
 
   const A=[...s.courtA], B=[...s.courtB];
@@ -193,11 +231,10 @@ function win(side){
       // somente o vencedor das 4 sai.
       // O perdedor permanece e enfrenta o próximo time formado pela fila
       // + jogadores do tetracampeão que acabou de sair.
-      s.queue.push(...winner);
-
       const next=take5();
 
       if(next){
+        s.queue.push(...winner);
         if(side==='A'){
           // Time B perdeu, mas permanece.
           s.courtA=next;
@@ -214,16 +251,14 @@ function win(side){
 
         toast('4ª vitória: vencedor saiu; perdedor permanece contra o próximo time.');
       }else{
-        // Cenário extremo: não há atletas suficientes para formar adversário.
-        // Mantemos a quadra sem alterar a fila de forma inconsistente.
-        const ids=new Set(winner.map(x=>x.id));
-        s.queue=s.queue.filter(x=>!ids.has(x.id));
+        // Não há 5 substitutos: preserva os times em quadra visualmente,
+        // mas bloqueia novo resultado até chegarem jogadores suficientes.
         s.courtA=A;
         s.courtB=B;
         s.streakA=side==='A'?4:0;
         s.streakB=side==='B'?4:0;
-
-        toast('4ª vitória registrada, mas ainda não há 5 atletas para formar o próximo time.');
+        s.pendingFourSide=side;
+        toast('4ª vitória: aguardando 5 atletas na fila para retirar o vencedor.');
       }
     }
 
@@ -237,10 +272,10 @@ function win(side){
 
   // REGRA NORMAL DE VITÓRIA (1ª, 2ª ou 3ª consecutiva):
   // perdedor vai para o final da fila; vencedor permanece.
-  s.queue.push(...loser);
   const next=take5();
 
   if(next){
+    s.queue.push(...loser);
     if(side==='A'){
       s.courtA=winner;
       s.courtB=next;
@@ -254,9 +289,7 @@ function win(side){
     }
   }else{
     // Sem 5 esperando, não há como substituir o perdedor.
-    // Desfaz a ida dele para a fila e mantém os dois times em quadra.
-    const ids=new Set(loser.map(x=>x.id));
-    s.queue=s.queue.filter(x=>!ids.has(x.id));
+    // Mantém os dois times, preservando a fila parcial e sua ordem.
     s.courtA=A;
     s.courtB=B;
 
@@ -279,6 +312,7 @@ function win(side){
 }
 
 function draw(){
+  if(s.pendingFourSide){toast('Aguarde a substituição do tetracampeão.');return}
   snap();
   const A=[...s.courtA],B=[...s.courtB];
   const duration=currentElapsed();
@@ -288,6 +322,10 @@ function draw(){
     s.queue.push(...A,...B);
     s.courtA=take5();s.courtB=take5();s.streakA=0;s.streakB=0;
     toast('Empate: os dois times saíram.');
+  }else if(s.queue.length<5){
+    // Sem time completo aguardando, ninguém precisa sair.
+    s.streakA=0;s.streakB=0;
+    toast('Empate: sem 5 reservas, os dois times permanecem.');
   }else{
     const keepA=confirm('Façam ímpar ou par.\n\nOK = Time A fica\nCancelar = Time B fica');
     const stay=keepA?A:B, leave=keepA?B:A;
@@ -442,7 +480,7 @@ function computeStats(){
   });
   s.injuryEvents.forEach(e=>{if(e.injured)ensure(e.injured).lesoes++});
   s.fourWinEvents.forEach(e=>(e.players||[]).forEach(p=>ensure(p).tetras++));
-  return [...map.values()].map(x=>({...x,aproveitamento:x.jogos?((x.vitorias*3+x.empates)/(x.jogos*3))*100:0})).sort((a,b)=>b.vitorias-a.vitorias||b.aproveitamento-a.aproveitamento||b.jogos-a.jogos||a.name.localeCompare(b.name,'pt-BR'));
+  return [...map.values()].map(x=>({...x,pontos:x.vitorias*3+x.empates,aproveitamento:x.jogos?((x.vitorias*3+x.empates)/(x.jogos*3))*100:0})).sort((a,b)=>b.pontos-a.pontos||b.vitorias-a.vitorias||b.aproveitamento-a.aproveitamento||b.jogos-a.jogos||a.name.localeCompare(b.name,'pt-BR'));
 }
 function renderSummary(){
   if(!el.summarySec)return;
@@ -459,7 +497,7 @@ function renderSummary(){
     <div class="summaryKpi"><span>Lesões</span><strong>${s.injuryEvents.length}</strong></div>
     <div class="summaryKpi"><span>4 vitórias</span><strong>${s.fourWinEvents.length}</strong></div>`;
   const active=stats.filter(x=>x.jogos>0||x.lesoes>0||x.tetras>0);
-  el.statsBody.innerHTML=active.length?active.map((x,i)=>`<tr><td><span class="rankPos">${i+1}</span>${esc(x.name)}</td><td>${x.jogos}</td><td>${x.vitorias}</td><td>${x.empates}</td><td>${x.derrotas}</td><td>${Math.round(x.aproveitamento)}%</td><td>${x.tetras}</td><td>${x.lesoes}</td></tr>`).join(''):'<tr><td colspan="8" class="emptyCell">As estatísticas aparecem após a primeira partida.</td></tr>';
+  el.statsBody.innerHTML=active.length?active.map((x,i)=>`<tr><td><span class="rankPos">${i+1}</span>${esc(x.name)}</td><td class="pointsCell">${x.pontos}</td><td>${x.jogos}</td><td>${x.vitorias}</td><td>${x.empates}</td><td>${x.derrotas}</td><td>${Math.round(x.aproveitamento)}%</td><td>${x.tetras}</td><td>${x.lesoes}</td></tr>`).join(''):'<tr><td colspan="9" class="emptyCell">As estatísticas aparecem após a primeira partida.</td></tr>';
   el.fourWinList.innerHTML=s.fourWinEvents.length?s.fourWinEvents.slice().reverse().map(e=>`<div class="achievement">🔥 <strong>Jogo ${e.match}</strong> · ${e.players.map(p=>esc(p.name)).join(', ')}</div>`).join(''):'<p class="muted">Nenhuma sequência de 4 vitórias registrada ainda.</p>';
 }
 
@@ -663,6 +701,48 @@ function drawCard(){
   return canvas;
 }
 
+function drawFullRankingCard(){
+  const stats=computeStats().filter(x=>x.jogos>0||x.lesoes>0||x.tetras>0);
+  if(!stats.length){toast('Finalize uma partida para gerar o ranking completo.');return null}
+  const canvas=document.createElement('canvas');
+  const rowH=66, top=310, bottom=105;
+  canvas.width=1080;canvas.height=Math.max(650,top+stats.length*rowH+bottom);
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#08111f';ctx.fillRect(0,0,canvas.width,canvas.height);
+  const grad=ctx.createLinearGradient(0,0,1080,0);grad.addColorStop(0,'#22c55e');grad.addColorStop(1,'#16a34a');ctx.fillStyle=grad;ctx.fillRect(0,0,1080,18);
+  ctx.fillStyle='#22c55e';ctx.font='800 26px Arial';ctx.fillText('QUINTA DO FUT',54,75);
+  ctx.fillStyle='#f8fafc';ctx.font='900 56px Arial';ctx.fillText('Ranking completo',54,142);
+  ctx.fillStyle='#94a3b8';ctx.font='26px Arial';ctx.fillText(`Vilelas Fut · ${new Date().toLocaleDateString('pt-BR')} · ${s.history.length} partidas`,54,189);
+  ctx.fillStyle='#86efac';ctx.font='800 23px Arial';ctx.fillText('Vitória = 3 pts  ·  Empate = 1 pt  ·  Derrota = 0 pt',54,239);
+  roundRect(ctx,48,263,984,42,9,'#1e293b');
+  ctx.fillStyle='#cbd5e1';ctx.font='800 19px Arial';
+  ctx.fillText('POS.',65,291);ctx.fillText('ATLETA',155,291);
+  const cols=[['PTS',620],['J',714],['V',783],['E',852],['D',921],['%',990]];
+  ctx.textAlign='right';cols.forEach(([t,x])=>ctx.fillText(t,x,291));ctx.textAlign='left';
+  stats.forEach((x,i)=>{
+    const y=top+i*rowH;
+    roundRect(ctx,48,y,984,rowH-6,10,i===0?'#10271b':i%2?'#101a2b':'#111827',i===0?'#166534':'#253147');
+    ctx.fillStyle=i===0?'#86efac':'#cbd5e1';ctx.font='900 23px Arial';ctx.fillText(`${i+1}º`,65,y+39);
+    ctx.fillStyle='#f8fafc';const size=fitText(ctx,x.name,410,25,15);ctx.font=`800 ${size}px Arial`;ctx.fillText(x.name,155,y+39);
+    ctx.textAlign='right';ctx.fillStyle='#86efac';ctx.font='900 25px Arial';ctx.fillText(String(x.pontos),620,y+39);
+    ctx.fillStyle='#cbd5e1';ctx.font='700 22px Arial';
+    [[x.jogos,714],[x.vitorias,783],[x.empates,852],[x.derrotas,921],[`${Math.round(x.aproveitamento)}%`,990]].forEach(([v,xpos])=>ctx.fillText(String(v),xpos,y+39));ctx.textAlign='left';
+  });
+  ctx.fillStyle='#94a3b8';ctx.font='20px Arial';ctx.fillText('PTS = pontos · J = jogos · V = vitórias · E = empates · D = derrotas',54,canvas.height-45);
+  ctx.fillStyle='#22c55e';ctx.font='800 20px Arial';ctx.textAlign='right';ctx.fillText('Desenvolvido por Paulo Victor',1025,canvas.height-45);ctx.textAlign='left';
+  return canvas;
+}
+async function shareFullRanking(){
+  const canvas=drawFullRankingCard();if(!canvas)return;
+  canvas.toBlob(async blob=>{
+    if(!blob){toast('Não foi possível gerar o ranking.');return}
+    const name=`vilelas-fut-ranking-${new Date().toISOString().slice(0,10)}.png`;
+    const file=new File([blob],name,{type:'image/png'});
+    try{if(navigator.share&&navigator.canShare?.({files:[file]})){await navigator.share({title:'Vilelas Fut · Ranking completo',files:[file]});return}}catch(e){if(e?.name==='AbortError')return}
+    downloadBlob(blob,name);toast('Ranking completo baixado.');
+  },'image/png');
+}
+
 function downloadBlob(blob,name){const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 async function shareNightCard(){
   const canvas=drawCard();if(!canvas)return;
@@ -691,9 +771,10 @@ function render(){renderGoalkeepers();renderPlayers();renderGame();renderSummary
 
 el.form.onsubmit=e=>{e.preventDefault();addPlayer(el.name.value);el.name.value='';el.name.focus()};
 if(el.keeperForm)el.keeperForm.onsubmit=e=>{e.preventDefault();addGoalkeeper(el.keeperName.value);el.keeperName.value='';el.keeperName.focus()};
-el.start.onclick=start;el.aWin.onclick=()=>win('A');el.bWin.onclick=()=>win('B');el.draw.onclick=draw;el.undo.onclick=undo;el.reset.onclick=reset;el.timerToggle.onclick=toggleTimer;el.timerReset.onclick=manualResetTimer;el.timerLimit.onchange=setTimerLimit;el.rulesBtn.onclick=()=>el.rulesModal.classList.remove('hidden');el.rulesClose.onclick=()=>el.rulesModal.classList.add('hidden');el.rulesModal.onclick=e=>{if(e.target===el.rulesModal)el.rulesModal.classList.add('hidden')};
+el.start.onclick=start;el.aWin.onclick=()=>requestResult('A');el.bWin.onclick=()=>requestResult('B');el.draw.onclick=()=>requestResult('draw');el.undo.onclick=undo;el.reset.onclick=reset;el.timerToggle.onclick=toggleTimer;el.timerReset.onclick=manualResetTimer;el.timerLimit.onchange=setTimerLimit;el.rulesBtn.onclick=()=>el.rulesModal.classList.remove('hidden');el.rulesClose.onclick=()=>el.rulesModal.classList.add('hidden');el.rulesModal.onclick=e=>{if(e.target===el.rulesModal)el.rulesModal.classList.add('hidden')};
 el.installBtn.onclick=installApp;el.installClose.onclick=()=>el.installModal.classList.add('hidden');el.installModal.onclick=e=>{if(e.target===el.installModal)el.installModal.classList.add('hidden')};
-el.scoreboardBtn.onclick=openScoreboard;el.scoreClose.onclick=closeScoreboard;el.scoreFullscreen.onclick=toggleScoreFullscreen;el.scoreTimerToggle.onclick=toggleTimer;el.scoreAWin.onclick=()=>win('A');el.scoreBWin.onclick=()=>win('B');el.scoreDraw.onclick=draw;el.shareCardBtn.onclick=shareNightCard;
+el.scoreboardBtn.onclick=openScoreboard;el.scoreClose.onclick=closeScoreboard;el.scoreFullscreen.onclick=toggleScoreFullscreen;el.scoreTimerToggle.onclick=toggleTimer;el.scoreAWin.onclick=()=>requestResult('A');el.scoreBWin.onclick=()=>requestResult('B');el.scoreDraw.onclick=()=>requestResult('draw');el.shareCardBtn.onclick=shareNightCard;el.shareRankingBtn.onclick=shareFullRanking;
+el.resultCancel.onclick=closeResultModal;el.resultConfirm.onclick=confirmResult;el.resultModal.onclick=e=>{if(e.target===el.resultModal)closeResultModal()};document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!el.resultModal.classList.contains('hidden'))closeResultModal()});
 if(s.timerRunning){s.timerStartedAt=Date.now();timerInterval=setInterval(updateTimer,500)}
 registerPWA();
 render();

@@ -110,7 +110,7 @@
   <section id="summarySec" class="card hidden">
     <div class="head">
       <div><small>V5 · ESTATÍSTICAS</small><h2>Resumo da noite</h2></div>
-      <button id="shareCardBtn" class="primary">📤 Card da noite</button>
+      <div class="cardShareActions"><button id="shareCardBtn" class="primary">📤 Card da noite</button><button id="shareRankingBtn" class="secondary">🏆 Ranking completo</button></div>
     </div>
     <div id="summaryGrid" class="summaryGrid"></div>
 
@@ -120,7 +120,7 @@
     </div>
     <div class="tableWrap">
       <table class="statsTable">
-        <thead><tr><th>Atleta</th><th>J</th><th>V</th><th>E</th><th>D</th><th>Aprov.</th><th>🔥4</th><th>🩹</th></tr></thead>
+        <thead><tr><th>Atleta</th><th>PTS</th><th>J</th><th>V</th><th>E</th><th>D</th><th>Aprov.</th><th>🔥4</th><th>🩹</th></tr></thead>
         <tbody id="statsBody"></tbody>
       </table>
     </div>
@@ -145,6 +145,13 @@
   </section>
   <footer class="appCredit">Desenvolvido por <strong>Paulo Victor</strong></footer>
 </main>
+<div id="resultModal" class="modal resultModal hidden" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+  <div class="modalCard compactModal resultConfirmCard">
+    <h2 id="resultTitle">Confirmar resultado?</h2>
+    <p id="resultDescription">Confira o resultado antes de registrar.</p>
+    <div class="resultModalActions"><button id="resultCancel" class="secondary">Cancelar</button><button id="resultConfirm" class="primary">Confirmar resultado</button></div>
+  </div>
+</div>
 <div id="rulesModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
   <div class="modalCard">
     <div class="head"><h2 id="rulesTitle">Regras · Vilelas Fut</h2><button id="rulesClose" class="secondary">Fechar</button></div>
@@ -158,7 +165,7 @@
       <h3>Desistência</h3><p>Atleta em quadra não pode desistir diretamente. Quando estiver na fila, o botão Desistiu remove o atleta da noite.</p>
       <h3>Cronômetro</h3><p>O cronômetro pode ser iniciado, pausado e continuado. Cada nova noite começa com alerta padrão de 8 minutos, podendo ser alterado para 5, 7, 10 ou 12 minutos, ou ficar sem limite. Ao atingir o tempo configurado, o app avisa, mas a partida continua. Ao registrar o resultado ele para, a duração é salva no histórico e o próximo jogo começa em 00:00.</p>
       <h3>Edição de nome</h3><p>O nome de qualquer atleta pode ser corrigido sem alterar sua posição na fila ou no time.</p>
-      <h3>Estatísticas da noite</h3><p>As partidas alimentam automaticamente o resumo e o ranking individual. Vitória vale 3 pontos, empate vale 1 e derrota vale 0 para o cálculo de aproveitamento. Em caso de lesão, o atleta que participou antes da substituição e o substituto contam como participantes daquela partida.</p>
+      <h3>Estatísticas da noite</h3><p>As partidas alimentam automaticamente o resumo e o ranking individual. Vitória vale 3 pontos, empate vale 1 e derrota vale 0. O ranking exibe pontos (PTS) e aproveitamento. Em caso de lesão, o atleta que participou antes da substituição e o substituto contam como participantes daquela partida.</p>
       <h3>Goleiros fixos</h3><p>Os goleiros são cadastrados separadamente porque atuam independentemente dos times em quadra. Cada defesa difícil pode ser registrada durante a noite e o ranking dos goleiros é ordenado pela quantidade de defesas difíceis. O botão Corrigir remove uma defesa em caso de lançamento errado.</p>
       <h3>Modo placar</h3><p>O modo placar mostra os times em quadra, sequência de vitórias, cronômetro, próximo time, controles principais e registro rápido de defesas difíceis dos goleiros. No iPhone, o botão Modo App orienta a abrir o PWA pela Tela de Início, pois o Safari não oferece tela cheia tradicional para páginas comuns.</p>
       <h3>Card da noite</h3><p>O app gera uma imagem com o resumo da noite, Top 5 jogadores, ranking dos goleiros por defesas difíceis e sequências de 4 vitórias. Em celulares compatíveis, o compartilhamento nativo permite enviar diretamente para aplicativos como WhatsApp; nos demais casos, o PNG é baixado.</p>

@@ -71,3 +71,16 @@ Suba todos os arquivos, incluindo `manifest.json`, `service-worker.js` e a pasta
 - Aumentados os botões Vitória A, Empate e Vitória B para facilitar o uso no iPhone.
 - Mantida a responsividade para telas menores e aparelhos com pouca altura.
 - Nenhuma regra do jogo foi alterada.
+
+## V6.2
+- Confirmação antes de registrar Vitória A, Vitória B ou Empate nas duas telas.
+- Coluna PTS no ranking (3 por vitória, 1 por empate, 0 por derrota); desempate original preservado.
+- Novo card PNG de ranking completo com todos os atletas participantes, além do Card da Noite existente.
+
+## V6.2.1 — Correções de regras
+- Ranking classificado por pontos (3/1/0), desempate por vitórias, aproveitamento, jogos e nome.
+- Empate com menos de 5 reservas mantém os dois times, sem ímpar/par.
+- Na quarta vitória com menos de 5 reservas, partida é encerrada e o próximo jogo aguarda chegarem 5 jogadores; o vencedor sai automaticamente quando a fila estiver completa.
+- Desfazer restaura também os goleiros e não duplica listeners de teclado.
+- Corrigido appVersion para 6.21.
+- Critério de lesão mantido: ambos os atletas que participaram recebem o resultado da partida. A mudança dessa regra exige decisão do grupo.

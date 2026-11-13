@@ -382,3 +382,14 @@ body.scoreboardOpen .toast{
   .scoreTimerToggle{min-height:42px;padding:7px 10px}
   .scoreControls button{min-height:44px;padding:7px 5px}
 }
+
+/* V6.2: confirmação e ranking */
+.cardShareActions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.pointsCell{font-weight:900;color:#86efac;font-size:14px!important}
+.resultModal{z-index:20000!important}
+.resultConfirmCard{width:min(440px,100%);padding:24px;text-align:center}
+.resultConfirmCard h2{font-size:24px;margin-bottom:12px}
+.resultConfirmCard p{color:#cbd5e1;line-height:1.5;margin-bottom:22px}
+.resultModalActions{display:flex;gap:12px;justify-content:center}
+.resultModalActions button{min-height:52px;flex:1;touch-action:manipulation;font-weight:800}
+@media(max-width:560px){.cardShareActions{justify-content:flex-start}.resultModalActions{flex-direction:column-reverse}.resultConfirmCard{padding:20px}}
